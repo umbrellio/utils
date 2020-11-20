@@ -22,7 +22,7 @@ module UmbrellioUtils
       retry_on(Sequel::UniqueConstraintViolation, times: times) do
         DB.transaction(savepoint: true, &block)
       rescue Sequel::UniqueConstraintViolation => error
-        constraint_name = Utils::Database.get_violated_constraint_name(error)
+        constraint_name = Database.get_violated_constraint_name(error)
 
         if checked_constraints.include?(constraint_name)
           raise error
