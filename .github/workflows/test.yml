@@ -1,11 +1,6 @@
 name: Test
 
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-
+on: [push, pull_request]
 
 env:
   FULL_COVERAGE_CHECK: false # Sometimes, sometimes...
