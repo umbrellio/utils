@@ -55,9 +55,9 @@ module UmbrellioUtils
     def parse_params
       case request.content_type
       when "application/json"
-        Parsing.safely_parse_json(body)
+        Utils::Parsing.safely_parse_json(body)
       when "application/xml"
-        Parsing.parse_xml(body)
+        Utils::Parsing.parse_xml(body)
       else
         request.get? ? request.GET : request.POST
       end
