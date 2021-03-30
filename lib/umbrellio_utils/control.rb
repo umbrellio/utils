@@ -21,21 +21,21 @@ module UmbrellioUtils
     def retry_on_unique_violation(times: Float::INFINITY, checked_constraints: [], &block)
       retry_on(Sequel::UniqueConstraintViolation, times: times) do
         DB.transaction(savepoint: true, &block)
-      rescue Sequel::UniqueConstraintViolation => error
-        constraint_name = Database.get_violated_constraint_name(error)
+      rescue Sequel::UniqueConstraintViolation => e
+        constraint_name = Utils::Database.get_violated_constraint_name(e)
 
         if checked_constraints.include?(constraint_name)
-          raise error
+          raise e
         else
-          raise UniqueConstraintViolation, error.message
+          raise UniqueConstraintViolation, e.message
         end
       end
     end
 
-    def run_non_critical(rescue_all: false)
-      yield
-    rescue (rescue_all ? Exception : StandardError) => error
-      Exceptions.notify!(error)
+    def run_non_critical(rescue_all: false, in_transaction: false, &block)
+      in_transaction ? DB.transaction(savepoint: true, &block) : yield
+    rescue (rescue_all ? Exception : StandardError) => e
+      Exceptions.notify!(e)
       nil
     end
 

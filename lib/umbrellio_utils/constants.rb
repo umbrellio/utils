@@ -19,8 +19,10 @@ module UmbrellioUtils
 
     def match_by_class!(**kwargs)
       name, instance = kwargs.shift
-      kwargs.find { |klass, _| instance.is_a?(klass) }&.last or
-        raise "Unsupported #{name} type: #{instance.inspect}"
+      result = kwargs.find { |klass, _| instance.is_a?(klass) }&.last
+      raise "Unsupported #{name} type: #{instance.inspect}" if result.nil?
+
+      result.is_a?(Proc) ? result.call : result
     end
   end
 end

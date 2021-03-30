@@ -27,7 +27,7 @@ module UmbrellioUtils
     end
 
     memoize def entry
-      Sequel::Model(:store)
+      Sequel::Model(UmbrellioUtils.config.store_table_name)
     end
 
     private

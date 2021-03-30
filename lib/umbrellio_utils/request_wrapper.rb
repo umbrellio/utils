@@ -4,8 +4,6 @@ module UmbrellioUtils
   class RequestWrapper
     include Memery
 
-    delegate :headers, :ip, to: :request
-
     def initialize(request)
       self.request = request
     end
@@ -42,6 +40,14 @@ module UmbrellioUtils
       request.path_parameters.except(:controller, :action).stringify_keys
     end
 
+    def headers
+      request.headers
+    end
+
+    def ip
+      request.ip
+    end
+
     private
 
     attr_accessor :request
@@ -49,9 +55,9 @@ module UmbrellioUtils
     def parse_params
       case request.content_type
       when "application/json"
-        Parsing.safely_parse_json(body)
+        Utils::Parsing.safely_parse_json(body)
       when "application/xml"
-        Parsing.parse_xml(body)
+        Utils::Parsing.parse_xml(body)
       else
         request.get? ? request.GET : request.POST
       end

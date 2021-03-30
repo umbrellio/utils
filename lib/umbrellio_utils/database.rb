@@ -8,11 +8,11 @@ module UmbrellioUtils
 
     def handle_constraint_error(constraint_name, &block)
       DB.transaction(savepoint: true, &block)
-    rescue Sequel::UniqueConstraintViolation => error
-      if constraint_name.to_s == get_violated_constraint_name(error)
+    rescue Sequel::UniqueConstraintViolation => e
+      if constraint_name.to_s == get_violated_constraint_name(e)
         raise HandledConstaintError
       else
-        raise error
+        raise e
       end
     end
 
@@ -21,7 +21,14 @@ module UmbrellioUtils
       error.result.error_field(PG::Result::PG_DIAG_CONSTRAINT_NAME)
     end
 
-    def with_temp_table(dataset)
+    def each_record(dataset, **options, &block)
+      primary_key = primary_key_from(options)
+      with_temp_table(dataset, **options) do |ids|
+        dataset.model.where(primary_key => ids).each(&block)
+      end
+    end
+
+    def with_temp_table(dataset, **options)
       model = dataset.model
       temp_table_name = "temp_#{model.table_name}_#{Time.current.to_i}".to_sym
 
@@ -29,7 +36,7 @@ module UmbrellioUtils
       DB.default.create_table(temp_table_name) { primary_key :id }
 
       temp_table = DB.default[temp_table_name]
-      pk = Sequel[model.table_name][:id]
+      pk = primary_key_from(options)
       ids = nil
       temp_table.insert(dataset.select(pk))
 
@@ -50,6 +57,12 @@ module UmbrellioUtils
 
     def clear_lamian_logs!
       Lamian.logger.send(:logdevs).each { |x| x.truncate(0) && x.rewind }
+    end
+
+    private
+
+    def primary_key_from(options)
+      options.fetch(:primary_key, :id)
     end
   end
 end
