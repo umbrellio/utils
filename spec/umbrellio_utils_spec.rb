@@ -24,4 +24,18 @@ describe UmbrellioUtils do
       described_class.config.store_table_name = :brand_new_name
     end
   end
+
+  context "with module extending" do
+    let(:utils_module) do
+      included_module = described_class
+
+      Module.new do
+        extend included_module
+      end
+    end
+
+    it "references to same config" do
+      expect(utils_module.config.object_id).to eq(described_class.config.object_id)
+    end
+  end
 end

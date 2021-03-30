@@ -10,13 +10,16 @@ module UmbrellioUtils
 
   extend self
 
+  # rubocop:disable Style/ClassVars
   def config
     CONFIG_SET_MUTEX.synchronize do
-      @config ||= Struct
+      @@config ||= Struct
         .new(:store_table_name, :http_client_name, keyword_init: true)
         .new(**default_settings)
     end
   end
+
+  # rubocop:enable Style/ClassVars
 
   def configure
     CONFIG_MUTEX.synchronize { yield config }
