@@ -14,6 +14,9 @@ jobs:
   full-check:
     runs-on: ubuntu-latest
 
+    # We want to run on external PRs, but not on our own internal PRs as they'll be run on push event
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'umbrellio/table_sync'
+
     steps:
       - uses: actions/checkout@v2
       - uses: ruby/setup-ruby@v1
@@ -38,6 +41,9 @@ jobs:
 
     env:
       FULL_TEST_COVERAGE_CHECK: false
+
+    # We want to run on external PRs, but not on our own internal PRs as they'll be run on push event
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'umbrellio/table_sync'
 
     strategy:
       fail-fast: false
