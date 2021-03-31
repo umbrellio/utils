@@ -19,7 +19,7 @@ module UmbrellioUtils
       end
     end
 
-    # Ranges goes from high to low priority
+    # Ranges go from high to low priority
     def merge_ranges(*ranges)
       ranges = ranges.map { |x| x.present? && x.size == 2 ? x : [nil, nil] }
       ranges.first.zip(*ranges[1..]).map { |x| x.find(&:present?) }
