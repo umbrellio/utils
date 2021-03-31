@@ -22,7 +22,7 @@ module UmbrellioUtils
       params = parts.select { |x| x.is_a?(Hash) }
       parts -= params
       params = params.reduce(&:merge)
-      uri = URI.join(*parts)
+      uri = File.join(*parts)
       uri.query = to_query(params) if params.present?
       uri.to_s
     end
