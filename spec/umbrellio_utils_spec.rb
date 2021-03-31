@@ -25,17 +25,46 @@ describe UmbrellioUtils do
     end
   end
 
-  context "with module extending" do
+  context "with module including" do
     let(:utils_module) do
       included_module = described_class
 
       Module.new do
-        extend included_module
+        include included_module
       end
     end
 
     it "references to same config" do
       expect(utils_module.config.object_id).to eq(described_class.config.object_id)
+    end
+
+    context "with module extending" do
+      around do |example|
+        old_const = UmbrellioUtils::Constants.dup
+        example.call
+        UmbrellioUtils.send(:remove_const, :Constants)
+        UmbrellioUtils.const_set(:Constants, old_const)
+      end
+
+      it "properly extends module" do
+        utils_module.extend_util!(:Constants) do
+          def test
+            "test"
+          end
+        end
+
+        expect(utils_module::Constants.public_methods).to include(:test)
+        expect(described_class::Constants.public_methods).to include(:test)
+        expect(utils_module::Constants.test).to eq("test")
+        expect(described_class::Constants.test).to eq("test")
+      end
+
+      context "with undefined constant name" do
+        it "raises an error" do
+          expect { utils_module.extend_util!(:SomeUndefinedName) { nil } }
+            .to raise_error(NameError)
+        end
+      end
     end
   end
 end
