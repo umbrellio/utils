@@ -6,6 +6,7 @@ module UmbrellioUtils
 
     VOWELS_REGEX = /[AEIOUY]/.freeze
     CONSONANTS_REGEX = /[BCDFGHJKLMNPQRSTVXZW]/.freeze
+    EMAIL_REGEXP = /\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i.freeze
 
     def secure_compare(src, dest)
       ActiveSupport::SecurityUtils.secure_compare(
@@ -30,7 +31,7 @@ module UmbrellioUtils
     end
 
     def valid_email?(email)
-      email.to_s =~ URI::MailTo::EMAIL_REGEXP
+      email.to_s =~ EMAIL_REGEXP
     end
 
     def valid_card_holder?(holder)
