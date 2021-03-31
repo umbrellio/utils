@@ -60,6 +60,20 @@ module UmbrellioUtils
       Lamian.logger.send(:logdevs).each { |x| x.truncate(0) && x.rewind }
     end
 
+    def create_temp_table(dataset, primary_key:)
+      model = dataset.model
+      time = Time.current
+      temp_table_name = "temp_#{model.table_name}_#{time.to_i}#{time.nsec}".to_sym
+      type = model.db_schema[primary_key][:db_type]
+
+      DB.drop_table?(temp_table_name)
+      DB.create_table(temp_table_name) { column primary_key, type, primary_key: true }
+
+      insert_ds = dataset.select(Sequel[model.table_name][primary_key])
+      DB[temp_table_name].insert(insert_ds)
+      temp_table_name
+    end
+
     private
 
     def primary_key_from(options)
