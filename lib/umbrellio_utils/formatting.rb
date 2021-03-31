@@ -22,9 +22,9 @@ module UmbrellioUtils
       params = parts.select { |x| x.is_a?(Hash) }
       parts -= params
       params = params.reduce(&:merge)
-      uri = URI(File.join(*parts))
-      uri.query = to_query(params) if params.present?
-      uri.to_s
+      url = File.join(*parts).delete_suffix("/")
+      query = to_query(params) if params.present?
+      [url, query].compact.join("?")
     end
 
     def uncapitalize_string(string)
