@@ -18,13 +18,15 @@ module UmbrellioUtils
       Store.delete(key) rescue nil
     end
 
-    def retry_on_unique_violation(times: Float::INFINITY, checked_constraints: [], &block)
+    def retry_on_unique_violation(
+      times: Float::INFINITY, retry_on_all_constraints: false, checked_constraints: [], &block
+    )
       retry_on(Sequel::UniqueConstraintViolation, times: times) do
         DB.transaction(savepoint: true, &block)
       rescue Sequel::UniqueConstraintViolation => e
         constraint_name = Database.get_violated_constraint_name(e)
 
-        if checked_constraints.include?(constraint_name)
+        if retry_on_all_constraints || checked_constraints.include?(constraint_name)
           raise e
         else
           raise UniqueConstraintViolation, e.message
