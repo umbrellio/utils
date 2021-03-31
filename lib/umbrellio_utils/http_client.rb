@@ -1,17 +1,28 @@
 # frozen_string_literal: true
 
 require "singleton"
-require "delegate"
 
 module UmbrellioUtils
-  class HTTPClient < Delegator
+  class HTTPClient
     include Singleton
 
-    def __getobj__
-      Thread.current[UmbrellioUtils.config.http_client_name] ||= EzClient.new(**ezclient_options)
+    def peform(*args)
+      client.perform(*args)
+    end
+
+    def perform!(*args)
+      client.perform!(*args)
+    end
+
+    def request(*args)
+      client.request(*args)
     end
 
     private
+
+    def client
+      Thread.current[UmbrellioUtils.config.http_client_name] ||= EzClient.new(**ezclient_options)
+    end
 
     def ezclient_options
       { keep_alive: 30, on_retry: method(:on_retry), timeout: 15 }
