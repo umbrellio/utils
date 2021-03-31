@@ -6,7 +6,7 @@ module UmbrellioUtils
   class HTTPClient
     include Singleton
 
-    def peform(*args)
+    def perform(*args)
       client.perform(*args)
     end
 
