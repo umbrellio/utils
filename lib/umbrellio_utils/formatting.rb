@@ -9,11 +9,13 @@ module UmbrellioUtils
     end
 
     def to_query(hash, namespace = nil)
-      hash.map do |key, value|
+      pairs = hash.map do |key, value|
         key = CGI.escape(key.to_s)
         ns = namespace ? "#{namespace}[#{key}]" : key
         value.is_a?(Hash) ? to_query(value, ns) : "#{CGI.escape(ns)}=#{CGI.escape(value.to_s)}"
-      end.join("&")
+      end
+
+      pairs.join("&")
     end
 
     def to_url(*parts)
@@ -31,32 +33,22 @@ module UmbrellioUtils
       string
     end
 
-    def render_money(money)
-      "#{money.round} #{money.currency}"
-    end
-
     def cache_key(*parts)
       parts.flatten.compact.join("-")
     end
 
+    def render_money(money)
+      "#{money.round} #{money.currency}"
+    end
+
+    def match_or_nil(str, regex)
+      return if str.blank?
+      return unless str.match?(regex)
+      str
+    end
+
     def encode_key(key)
       Base64.strict_encode64(key.to_der)
-    end
-
-    def to_amount_hash(amount)
-      { amount: amount.to_d, currency: amount.currency.to_s }
-    end
-
-    def to_amount_numeric(amount)
-      amount.to_f
-    end
-
-    def to_amount_int(amount)
-      amount.fractional.to_i
-    end
-
-    def to_amount_currency(amount)
-      amount.currency.iso_code
     end
 
     def to_date_part_string(part)

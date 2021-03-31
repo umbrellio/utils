@@ -4,9 +4,6 @@ require "bundler/setup"
 require "simplecov"
 require "simplecov-lcov"
 
-SimpleCov.enable_coverage :line
-SimpleCov.enable_coverage :branch
-
 SimpleCov::Formatter::LcovFormatter.config do |c|
   c.report_with_single_file = true
   c.lcov_file_name = "lcov.info"
@@ -18,11 +15,13 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
   SimpleCov::Formatter::LcovFormatter,
 ])
 
-SimpleCov.minimum_coverage(100) if ENV["FULL_COVERAGE_CHECK"]
-
+SimpleCov.minimum_coverage(100) if ENV["FULL_COVERAGE_CHECK"] == "true"
+SimpleCov.enable_coverage(:branch)
+SimpleCov.enable_coverage(:line)
+SimpleCov.add_filter "spec"
 SimpleCov.start
 
-require "umbrellio_utils"
+require "umbrellio-utils"
 
 Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
 

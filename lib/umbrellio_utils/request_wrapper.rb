@@ -4,8 +4,6 @@ module UmbrellioUtils
   class RequestWrapper
     include Memery
 
-    delegate :headers, :ip, to: :request
-
     def initialize(request)
       self.request = request
     end
@@ -40,6 +38,14 @@ module UmbrellioUtils
 
     memoize def path_parameters
       request.path_parameters.except(:controller, :action).stringify_keys
+    end
+
+    def headers
+      request.headers
+    end
+
+    def ip
+      request.ip
     end
 
     private

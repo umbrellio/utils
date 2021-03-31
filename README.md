@@ -1,28 +1,29 @@
-# UmbrellioUtils
+# Umbrellio Utils
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'umbrellio_utils'
+gem "umbrellio-utils"
 ```
 
 And then execute:
-
-    $ bundle install
-
+```bash
+$ bundle install
+```
 Or install it yourself as:
-
-    $ gem install umbrellio_utils
+```bash
+$ gem install umbrellio-utils
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+I hope that a full documentation is comming soon :).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/umbrellio_utils.
+Bug reports and pull requests are welcome on GitHub at https://github.com/umbrellio/utils.
 
 
 ## License
@@ -31,6 +32,8 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Authors
 
+Created by Umbrellio's Ruby developers
+
 <a href="https://github.com/umbrellio/">
 <img style="float: left;" src="https://umbrellio.github.io/Umbrellio/supported_by_umbrellio.svg" alt="Supported by Umbrellio" width="439" height="72">
-</
+</a>

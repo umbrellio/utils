@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["JustAnotherDude"]
   spec.email         = ["VanyaZ158@gmail.com"]
 
-  spec.summary       = "A set of utilities that speed up development."
-  spec.description   = "UmbrellioUtils is collection of utility classes and helpers."
+  spec.summary       = "A set of utilities that speed up development"
+  spec.description   = "UmbrellioUtils is collection of utility classes and helpers"
   spec.homepage      = "https://github.com/umbrellio/utils"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.6.0")
@@ -26,11 +26,11 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "activesupport"
   spec.add_dependency "memery"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"
+  spec.add_development_dependency "ci-helper"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
