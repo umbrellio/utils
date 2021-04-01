@@ -6,16 +6,16 @@ module UmbrellioUtils
   class HTTPClient
     include Singleton
 
-    def perform(*args)
-      client.perform(*args)
+    def perform(*args, **kwargs)
+      client.perform(*args, **kwargs)
     end
 
-    def perform!(*args)
-      client.perform!(*args)
+    def perform!(*args, **kwargs)
+      client.perform!(*args, **kwargs)
     end
 
-    def request(*args)
-      client.request(*args)
+    def request(*args, **kwargs)
+      client.request(*args, **kwargs)
     end
 
     private
