@@ -8,6 +8,21 @@ module UmbrellioUtils
       symbol.to_s.pluralize.to_sym
     end
 
+    def merge_query_into_url(url, query)
+      uri = Addressable::URI.parse(url)
+      url = uri.omit(:query)
+      original_query = uri.query_values || {}
+      to_url(url, **original_query, **query.stringify_keys)
+    end
+
+    def to_url(*parts)
+      params = parts.select { |x| x.is_a?(Hash) }
+      parts -= params
+      params = params.reduce(&:merge)
+      query = to_query(params).presence if params.present?
+      [File.join(*parts), query].compact.join("?")
+    end
+
     def to_query(hash, namespace = nil)
       pairs = hash.map do |key, value|
         key = CGI.escape(key.to_s)
@@ -16,15 +31,6 @@ module UmbrellioUtils
       end
 
       pairs.join("&")
-    end
-
-    def to_url(*parts)
-      params = parts.select { |x| x.is_a?(Hash) }
-      parts -= params
-      params = params.reduce(&:merge)
-      uri = URI.join(*parts)
-      uri.query = to_query(params) if params.present?
-      uri.to_s
     end
 
     def uncapitalize_string(string)

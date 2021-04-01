@@ -29,34 +29,49 @@ module UmbrellioUtils
     end
 
     def with_temp_table(dataset, **options)
-      model = dataset.model
-      temp_table_name = "temp_#{model.table_name}_#{Time.current.to_i}".to_sym
+      primary_key = primary_key_from(options)
+      page_size = options.fetch(:page_size, 1_000)
+      do_sleep = options.fetch(:sleep, Rails.env.production?)
 
-      DB.default.drop_table?(temp_table_name)
-      DB.default.create_table(temp_table_name) { primary_key :id }
+      temp_table_name = create_temp_table(dataset, primary_key: primary_key)
 
-      temp_table = DB.default[temp_table_name]
-      pk = primary_key_from(options)
-      ids = nil
-      temp_table.insert(dataset.select(pk))
+      pk_set = []
 
       loop do
         DB.transaction do
-          id_expr = temp_table.select(:id).reverse(:id).limit(1000)
-          ids = temp_table.where(id: id_expr).returning.delete.map { |item| item[:id] }
-          yield(ids) if ids.any?
+          pk_expr = DB[temp_table_name].select(primary_key).reverse(primary_key).limit(page_size)
+
+          deleted_items = DB[temp_table_name].where(primary_key => pk_expr).returning.delete
+          pk_set = deleted_items.map { |item| item[primary_key] }
+
+          yield(pk_set) if pk_set.any?
         end
 
-        break if ids.empty?
-        sleep(1) if Rails.env.production?
+        break if pk_set.empty?
+
+        sleep(1) if do_sleep
         clear_lamian_logs!
       end
     ensure
-      DB.default.drop_table(temp_table_name)
+      DB.drop_table(temp_table_name)
     end
 
     def clear_lamian_logs!
       Lamian.logger.send(:logdevs).each { |x| x.truncate(0) && x.rewind }
+    end
+
+    def create_temp_table(dataset, primary_key:)
+      model = dataset.model
+      time = Time.current
+      temp_table_name = "temp_#{model.table_name}_#{time.to_i}#{time.nsec}".to_sym
+      type = model.db_schema[primary_key][:db_type]
+
+      DB.drop_table?(temp_table_name)
+      DB.create_table(temp_table_name) { column primary_key, type, primary_key: true }
+
+      insert_ds = dataset.select(Sequel[model.table_name][primary_key])
+      DB[temp_table_name].insert(insert_ds)
+      temp_table_name
     end
 
     private
