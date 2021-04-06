@@ -60,5 +60,19 @@ module UmbrellioUtils
     def to_date_part_string(part)
       format("%<part>02d", part: part)
     end
+
+    def expand_hash(hash, delemiter: ".", key_converter: :to_sym)
+      hash.each_with_object(Misc.build_infinite_hash) do |entry, memo|
+        path, value = entry
+        *path_to_key, key = path.to_s.split(delemiter).map(&key_converter)
+
+        if path_to_key.empty?
+          memo[key] = value
+        else
+          resolved_hash = memo.dig(*path_to_key)
+          resolved_hash[key] = value
+        end
+      end
+    end
   end
 end

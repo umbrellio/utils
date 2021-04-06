@@ -1,4 +1,4 @@
-# Umbrellio Utils
+# Umbrellio Utils [![Gem Version](https://badge.fury.io/rb/umbrellio-utils.svg)](https://badge.fury.io/rb/umbrellio-utils) [![Coverage Status](https://coveralls.io/repos/github/umbrellio/utils/badge.svg?branch=main)](https://coveralls.io/github/umbrellio/utils?branch=main)
 
 ## Installation
 

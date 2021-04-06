@@ -3,9 +3,7 @@
 require "memery"
 
 module UmbrellioUtils
-  CONFIG_SET_MUTEX = Mutex.new
-  CONFIG_MUTEX = Mutex.new
-  EXTENSION_MUTEX = Mutex.new
+  GLOBAL_MUTEX = Mutex.new
 
   Dir["#{__dir__}/*/*.rb"].each { |file_path| require_relative(file_path) }
 
@@ -18,7 +16,7 @@ module UmbrellioUtils
 
   # rubocop:disable Style/ClassVars
   def config
-    CONFIG_SET_MUTEX.synchronize do
+    synchronize do
       @@config ||= Struct
         .new(:store_table_name, :http_client_name, keyword_init: true)
         .new(**default_settings)
@@ -28,12 +26,12 @@ module UmbrellioUtils
   # rubocop:enable Style/ClassVars
 
   def configure
-    CONFIG_MUTEX.synchronize { yield config }
+    synchronize { yield config }
   end
 
   def extend_util!(module_name, &block)
     const = UmbrellioUtils.const_get(module_name)
-    EXTENSION_MUTEX.synchronize { const.class_eval(&block) }
+    synchronize { const.class_eval(&block) }
   end
 
   private
@@ -43,5 +41,9 @@ module UmbrellioUtils
       store_table_name: :store,
       http_client_name: :application_httpclient,
     }
+  end
+
+  def synchronize(&block)
+    GLOBAL_MUTEX.owned? ? yield : GLOBAL_MUTEX.synchronize(&block)
   end
 end
