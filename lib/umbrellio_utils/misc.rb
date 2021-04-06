@@ -24,5 +24,9 @@ module UmbrellioUtils
       ranges = ranges.map { |x| x.present? && x.size == 2 ? x : [nil, nil] }
       ranges.first.zip(*ranges[1..]).map { |x| x.find(&:present?) }
     end
+
+    def build_infinite_hash
+      Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
+    end
   end
 end
