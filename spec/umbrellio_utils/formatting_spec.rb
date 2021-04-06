@@ -20,7 +20,10 @@ describe UmbrellioUtils::Formatting do
       let(:kwargs) { Hash[key_converter: :to_s] }
 
       specify do
-        is_expected.to eq("deep" => { "first" => true, "second" => false }, "root" => "kek")
+        expect(expanded_hash).to eq(
+          "deep" => { "first" => true, "second" => false },
+          "root" => "kek",
+        )
       end
     end
   end

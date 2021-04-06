@@ -17,3 +17,7 @@ Naming/FileName:
 
 Naming/RescuedExceptionsVariableName:
   Enabled: false
+
+Style/HashConversion:
+  Exclude:
+    - spec/**/*_spec.rb
