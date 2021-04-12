@@ -93,6 +93,7 @@ module UmbrellioUtils
     #  {#expand_hash} method accepts
     #
     # @return [Hash] expanded hash
+    #
     def deeply_expand_hash(hash, **expand_hash_options)
       transformed_hash = hash.transform_values do |value|
         next deeply_expand_hash(value, **expand_hash_options) if value.is_a?(Hash)
