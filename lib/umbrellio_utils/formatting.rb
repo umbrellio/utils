@@ -61,6 +61,16 @@ module UmbrellioUtils
       format("%<part>02d", part: part)
     end
 
+    #
+    # Expands a hash whose keys contain the path.
+    #
+    # @param [Hash] hash hash, which you want to expand
+    # @param [String] delemiter, separator, which is used in the value of the keys
+    # @param [Proc, Lambda, Symbol] key_converter, converter for key's value.
+    #  Defaults to :to_sym
+    #
+    # @return [Hash] expanded hash
+    #
     def expand_hash(hash, delemiter: ".", key_converter: :to_sym)
       hash.each_with_object(Misc.build_infinite_hash) do |entry, memo|
         path, value = entry
@@ -73,6 +83,24 @@ module UmbrellioUtils
           resolved_hash[key] = value
         end
       end
+    end
+
+    #
+    # Expands a nested hash whose keys contain the path.
+    #
+    # @param [Hash] hash, hash, which you want to expand
+    # @param [Hash] **expand_hash_options options, that the
+    #  {#expand_hash} method accepts
+    #
+    # @return [Hash] expanded hash
+    def deeply_expand_hash(hash, **expand_hash_options)
+      transformed_hash = hash.transform_values do |value|
+        next deeply_expand_hash(value, **expand_hash_options) if value.is_a?(Hash)
+
+        value
+      end
+
+      expand_hash(transformed_hash, **expand_hash_options)
     end
   end
 end
