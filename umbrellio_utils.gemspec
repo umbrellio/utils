@@ -16,6 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/umbrellio/utils"
+  spec.metadata["documentation_uri"] = "https://rubydoc.info/gems/umbrellio-utils"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -37,4 +38,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop-config-umbrellio"
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "simplecov-lcov"
+  spec.add_development_dependency "yard"
 end

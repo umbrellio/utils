@@ -107,6 +107,7 @@ GEM
       sequel
       symbiont-ruby (>= 0.6)
     unicode-display_width (2.0.0)
+    yard (0.9.26)
     zeitwerk (2.4.2)
 
 PLATFORMS
@@ -123,6 +124,7 @@ DEPENDENCIES
   simplecov
   simplecov-lcov
   umbrellio-utils!
+  yard
 
 BUNDLED WITH
    2.2.15
