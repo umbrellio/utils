@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module UmbrellioUtils
+module
   module Misc
     extend self
 
@@ -30,7 +30,7 @@ module UmbrellioUtils
     end
 
     #
-    # Sets #default and #default_proc values to nil.
+    # Deeply sets #default and #default_proc values to nil.
     #
     # @param [Hash] hash, hash, for which you want to reset defaults.
     #
