@@ -25,6 +25,18 @@ module UmbrellioUtils
       ranges.first.zip(*ranges[1..]).map { |x| x.find(&:present?) }
     end
 
+    #
+    # Builds empty hash, which recursively returns empty hash, if key is not found.
+    # Also note, that this hash and all subhashes has set #default_proc.
+    # To reset this attribute use {#reset_defaults_for_hash}
+    #
+    # @example Dig to key
+    #  h = UmbrellioUtils::Misc.build_infinite_hash => {}
+    #  h.dig(:kek, :pek) => {}
+    #  h => { kek: { pek: {} } }
+    #
+    # @return [Hash] empty infinite hash.
+    #
     def build_infinite_hash
       Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
     end
@@ -32,7 +44,7 @@ module UmbrellioUtils
     #
     # Deeply sets #default and #default_proc values to nil.
     #
-    # @param [Hash] hash, hash, for which you want to reset defaults.
+    # @param [Hash] hash hash, for which you want to reset defaults.
     #
     # @return [Hash] resetted hash.
     #
