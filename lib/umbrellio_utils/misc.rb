@@ -28,5 +28,25 @@ module UmbrellioUtils
     def build_infinite_hash
       Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
     end
+
+    #
+    # Sets #default and #default_proc values to nil.
+    #
+    # @param [Hash] hash, hash, for which you want to reset defaults.
+    #
+    # @return [Hash] resetted hash.
+    #
+    def reset_defaults_for_hash(hash)
+      hash.dup.tap do |dup_hash|
+        dup_hash.default = nil
+        dup_hash.default_proc = nil
+
+        dup_hash.transform_values! do |obj|
+          next obj.deep_dup unless obj.is_a?(Hash)
+
+          reset_defaults_for_hash(obj)
+        end
+      end
+    end
   end
 end

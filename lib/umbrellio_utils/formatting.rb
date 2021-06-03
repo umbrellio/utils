@@ -72,7 +72,7 @@ module UmbrellioUtils
     # @return [Hash] expanded hash
     #
     def expand_hash(hash, delemiter: ".", key_converter: :to_sym)
-      hash.each_with_object(Misc.build_infinite_hash) do |entry, memo|
+      result = hash.each_with_object(Misc.build_infinite_hash) do |entry, memo|
         path, value = entry
         *path_to_key, key = path.to_s.split(delemiter).map(&key_converter)
 
@@ -83,6 +83,8 @@ module UmbrellioUtils
           resolved_hash[key] = value
         end
       end
+
+      Misc.reset_defaults_for_hash(result)
     end
 
     #

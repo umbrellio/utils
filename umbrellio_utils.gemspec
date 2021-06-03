@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "memery", "~> 1"
 
+  spec.add_development_dependency "activesupport"
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"
   spec.add_development_dependency "ci-helper"

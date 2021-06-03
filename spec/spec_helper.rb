@@ -21,6 +21,7 @@ SimpleCov.enable_coverage(:line)
 SimpleCov.add_filter "spec"
 SimpleCov.start
 
+require "active_support/all"
 require "umbrellio-utils"
 
 Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
