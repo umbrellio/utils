@@ -15,7 +15,7 @@ describe UmbrellioUtils::Formatting do
 
     context "with other delimiter" do
       let(:hash) { Hash["deep,first": true, "deep,second": false, root: "kek"] }
-      let(:kwargs) { Hash[delemiter: ","] }
+      let(:kwargs) { Hash[delimiter: ","] }
 
       specify { is_expected.to eq(deep: { first: true, second: false }, root: "kek") }
     end

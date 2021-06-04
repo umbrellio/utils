@@ -19,14 +19,16 @@ module UmbrellioUtils
       end
     end
 
+    #
     # Ranges go from high to low priority
+    #
     def merge_ranges(*ranges)
       ranges = ranges.map { |x| x.present? && x.size == 2 ? x : [nil, nil] }
       ranges.first.zip(*ranges[1..]).map { |x| x.find(&:present?) }
     end
 
     #
-    # Builds empty hash, which recursively returns empty hash, if key is not found.
+    # Builds empty hash which recursively returns empty hash, if key is not found.
     # Also note, that this hash and all subhashes has set #default_proc.
     # To reset this attribute use {#reset_defaults_for_hash}
     #
@@ -44,9 +46,9 @@ module UmbrellioUtils
     #
     # Deeply sets #default and #default_proc values to nil.
     #
-    # @param [Hash] hash hash, for which you want to reset defaults.
+    # @param hash [Hash] hash for which you want to reset defaults.
     #
-    # @return [Hash] resetted hash.
+    # @return [Hash] reset hash.
     #
     def reset_defaults_for_hash(hash)
       hash.dup.tap do |dup_hash|
