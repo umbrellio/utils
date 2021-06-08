@@ -52,7 +52,7 @@ Some modules and classes are configurable. Here's the full list of settings and 
   `UmbrellioUtils::HTTPClient`. Defaults to `:application_httpclient`
 
 You can change config in two ways. Firstly, you can change values by accessing configuration
-directly. Secondly, you can use `UmbrellioUtils::configure` method, which accepts a block.
+directly. Secondly, you can use `UmbrellioUtils::configure` method which accepts a block.
 
 ```ruby
 

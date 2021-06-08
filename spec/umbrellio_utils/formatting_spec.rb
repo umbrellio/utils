@@ -7,11 +7,15 @@ describe UmbrellioUtils::Formatting do
     let(:hash) { Hash["deep.first": true, "deep.second": false, root: "kek"] }
     let(:kwargs) { Hash[] }
 
-    specify { is_expected.to eq(deep: { first: true, second: false }, root: "kek") }
+    it "properly expands and resets defaults" do
+      expect(expanded_hash).to eq(deep: { first: true, second: false }, root: "kek")
+      expect(expanded_hash.default_proc).to eq(nil)
+      expect(expanded_hash[:deep].default_proc).to eq(nil)
+    end
 
     context "with other delimiter" do
       let(:hash) { Hash["deep,first": true, "deep,second": false, root: "kek"] }
-      let(:kwargs) { Hash[delemiter: ","] }
+      let(:kwargs) { Hash[delimiter: ","] }
 
       specify { is_expected.to eq(deep: { first: true, second: false }, root: "kek") }
     end

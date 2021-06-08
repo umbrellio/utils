@@ -64,17 +64,17 @@ module UmbrellioUtils
     #
     # Expands a hash whose keys contain the path.
     #
-    # @param [Hash] hash hash, which you want to expand
-    # @param [String] delemiter, separator, which is used in the value of the keys
-    # @param [Proc, Lambda, Symbol] key_converter, converter for key's value.
+    # @param hash [Hash] hash which you want to expand
+    # @param delimiter [String] separator which is used in the value of the keys
+    # @param key_converter [Proc, Lambda, Symbol] converter for key's value.
     #  Defaults to :to_sym
     #
     # @return [Hash] expanded hash
     #
-    def expand_hash(hash, delemiter: ".", key_converter: :to_sym)
-      hash.each_with_object(Misc.build_infinite_hash) do |entry, memo|
+    def expand_hash(hash, delimiter: ".", key_converter: :to_sym)
+      result = hash.each_with_object(Misc.build_infinite_hash) do |entry, memo|
         path, value = entry
-        *path_to_key, key = path.to_s.split(delemiter).map(&key_converter)
+        *path_to_key, key = path.to_s.split(delimiter).map(&key_converter)
 
         if path_to_key.empty?
           memo[key] = value
@@ -83,13 +83,15 @@ module UmbrellioUtils
           resolved_hash[key] = value
         end
       end
+
+      Misc.reset_defaults_for_hash(result)
     end
 
     #
     # Expands a nested hash whose keys contain the path.
     #
-    # @param [Hash] hash, hash, which you want to expand
-    # @param [Hash] **expand_hash_options options, that the
+    # @param hash [Hash] hash which you want to expand
+    # @param **expand_hash_options [Hash] options, that the
     #  {#expand_hash} method accepts
     #
     # @return [Hash] expanded hash
