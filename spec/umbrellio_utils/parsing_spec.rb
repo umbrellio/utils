@@ -15,7 +15,7 @@ describe UmbrellioUtils::Parsing do
 
     specify do
       expect(parsed_data).to eq(
-        root: { some_tag: "some value", other_tag: "other value &" }
+        root: { some_tag: "some value", other_tag: "other value &" },
       )
     end
 
@@ -24,7 +24,7 @@ describe UmbrellioUtils::Parsing do
 
       specify do
         expect(parsed_data).to eq(
-          root: { "some-tag": "some value", otherTag: "other value &" }
+          root: { "some-tag": "some value", otherTag: "other value &" },
         )
       end
     end
@@ -34,7 +34,7 @@ describe UmbrellioUtils::Parsing do
 
       specify do
         expect(parsed_data).to eq(
-          root: { "@some_attr": "test", some_tag: "some value", other_tag: "other value &" }
+          root: { "@some_attr": "test", some_tag: "some value", other_tag: "other value &" },
         )
       end
     end
