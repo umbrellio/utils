@@ -24,6 +24,9 @@ SimpleCov.start
 require "active_support/all"
 require "umbrellio-utils"
 
+require "nokogiri"
+require "nori"
+
 Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
 
 RSpec.configure do |config|
