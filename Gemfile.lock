@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    umbrellio-utils (0.3.2)
+    umbrellio-utils (0.4.0)
       memery (~> 1)
 
 GEM
@@ -35,6 +35,8 @@ GEM
       ruby2_keywords (~> 0.0.2)
     method_source (1.0.0)
     minitest (5.14.4)
+    nokogiri (1.12.5-x86_64-darwin)
+      racc (~> 1.4)
     nokogiri (1.12.5-x86_64-linux)
       racc (~> 1.4)
     nori (2.6.0)
