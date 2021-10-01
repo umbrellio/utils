@@ -15,7 +15,7 @@ module UmbrellioUtils
       # @return [String] data
       def call(log, _logger)
         data = build_data_for(log)
-        data.compact.to_json
+        data.to_json
       end
 
       private
@@ -28,7 +28,7 @@ module UmbrellioUtils
           name: log.name,
           thread_fingerprint: thread_fingerprint_for(log),
           message: log.message,
-          tags: log.named_tags.presence,
+          tags: log.named_tags,
           time: log.time.utc.iso8601(3),
         }
       end
