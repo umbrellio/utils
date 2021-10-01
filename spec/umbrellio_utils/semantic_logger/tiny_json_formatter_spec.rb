@@ -38,6 +38,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
       thread_fingerprint: "85bb6139",
       message: "Some Message",
       time: "2007-01-01T00:00:00.000Z",
+      tags: {},
     )
   end
 end

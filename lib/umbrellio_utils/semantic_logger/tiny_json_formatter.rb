@@ -9,14 +9,15 @@ module UmbrellioUtils
     #   formatter = UmbrellioUtils::SemanticLogger::TinyJsonFormatter.new
     #   SemanticLogger.add_appender(io: $stdout, formatter: formatter)
     class TinyJsonFormatter
+      include Memery
+
       # Formats log structure into the JSON string.
-      # @param [SemanticLogger::Log] log log data.
-      # @param [SemanticLogger::Logger] logger active logger.
+      # @param log [SemanticLogger::Log] log's data structure.
+      # @param logger [SemanticLogger::Logger] active logger.
       # @return [String] data
       def call(log, _logger)
         data = build_data_for(log)
-
-        data.select { |_k, v| v.present? }.to_h.to_json
+        data.to_json
       end
 
       private
@@ -36,8 +37,8 @@ module UmbrellioUtils
 
       # Calculates MD5 fingerprint for the thread, in which the log was made.
       # @private
-      def thread_fingerprint_for(log)
-        Digest::MD5.hexdigest([log.thread_name, Process.pid].join)[0...8]
+      memoize def thread_fingerprint_for(log)
+        Digest::MD5.hexdigest("#{log.thread_name}#{Process.pid}")[0...8]
       end
     end
   end
