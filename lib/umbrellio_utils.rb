@@ -5,8 +5,6 @@ require "memery"
 module UmbrellioUtils
   GLOBAL_MUTEX = Mutex.new
 
-  Dir["#{__dir__}/*/*.rb"].each { |file_path| require_relative(file_path) }
-
   extend self
 
   def included(othermod)
@@ -47,3 +45,21 @@ module UmbrellioUtils
     GLOBAL_MUTEX.owned? ? yield : GLOBAL_MUTEX.synchronize(&block)
   end
 end
+
+require_relative "umbrellio_utils/cards"
+require_relative "umbrellio_utils/checks"
+require_relative "umbrellio_utils/constants"
+require_relative "umbrellio_utils/control"
+require_relative "umbrellio_utils/database"
+require_relative "umbrellio_utils/formatting"
+require_relative "umbrellio_utils/http_client"
+require_relative "umbrellio_utils/misc"
+require_relative "umbrellio_utils/parsing"
+require_relative "umbrellio_utils/passwords"
+require_relative "umbrellio_utils/random"
+require_relative "umbrellio_utils/request_wrapper"
+require_relative "umbrellio_utils/rounding"
+require_relative "umbrellio_utils/semantic_logger/tiny_json_formatter"
+require_relative "umbrellio_utils/store"
+require_relative "umbrellio_utils/vault"
+require_relative "umbrellio_utils/version"
