@@ -20,7 +20,10 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
       allow(instance).to receive(:time).and_return(log_time)
     end
   end
-  let(:formatter) { described_class.new }
+  let(:result) { formatter.call(log, nil) }
+
+  let(:formatter) { described_class.new(**custom_names_mapping) }
+  let(:custom_names_mapping) { Hash[] }
 
   let(:log_level) { :debug }
   let(:log_name) { "SomeName" }
@@ -30,15 +33,43 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
   let(:log_time) { Time.utc(2007) }
 
   it "properly formats log" do
-    result = formatter.call(log, nil)
-
     expect(result).to be_json_as(
       severity: "DEBUG",
       name: "SomeName",
       thread_fingerprint: "85bb6139",
       message: "Some Message",
       time: "2007-01-01T00:00:00.000Z",
-      tags: {},
+      app_tags: {},
     )
+  end
+
+  context "with custom field names" do
+    let(:custom_names_mapping) { Hash[message: :note, time: :timestamp] }
+
+    it "uses custom field names" do
+      expect(result).to be_json_as(
+        severity: "DEBUG",
+        name: "SomeName",
+        thread_fingerprint: "85bb6139",
+        note: "Some Message",
+        timestamp: "2007-01-01T00:00:00.000Z",
+        app_tags: {},
+      )
+    end
+  end
+
+  context "with invalid mapping" do
+    let(:custom_names_mapping) { Hash[kek: :pek] }
+
+    it "ignores this fields" do
+      expect(result).to be_json_as(
+        severity: "DEBUG",
+        name: "SomeName",
+        thread_fingerprint: "85bb6139",
+        message: "Some Message",
+        time: "2007-01-01T00:00:00.000Z",
+        app_tags: {},
+      )
+    end
   end
 end
