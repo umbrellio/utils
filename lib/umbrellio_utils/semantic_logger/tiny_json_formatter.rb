@@ -15,7 +15,8 @@ module UmbrellioUtils
         name: :name,
         thread_fingerprint: :thread_fingerprint,
         message: :message,
-        app_tags: :app_tags,
+        tags: :tags,
+        named_tags: :named_tags,
         time: :time,
       }.freeze
 
@@ -26,7 +27,8 @@ module UmbrellioUtils
       # @option custom_names_mapping [Symbol] :thread_fingerprint
       #   custom name for the thread_fingerprint field.
       # @option custom_names_mapping [Symbol] :message custom name for the `message` field.
-      # @option custom_names_mapping [Symbol] :app_tags custom name for the `app_tags` field.
+      # @option custom_names_mapping [Symbol] :tags custom name for the `tags` field.
+      # @option custom_names_mapping [Symbol] :named_tags custom name for the `named_tags` field.
       # @option custom_names_mapping [Symbol] :time custom name for the `time` field.
       # @example Use custom name for the `message` and `time` fields
       #   UmbrellioUtils::SemanticLogger::TinyJsonFormatter.new(
@@ -69,6 +71,7 @@ module UmbrellioUtils
           log.name,
           thread_fingerprint_for(log),
           log.message,
+          log.tags,
           log.named_tags,
           log.time.utc.iso8601(3),
         ]
