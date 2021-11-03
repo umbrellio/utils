@@ -90,7 +90,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
         message: "Some Message",
         time: "2007-01-01T00:00:00.000Z",
         tags: ["kek"],
-        named_tags: { id:  "very-long-id" },
+        named_tags: { id: "very-long-id" },
       )
     end
   end
