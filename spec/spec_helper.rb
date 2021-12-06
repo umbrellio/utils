@@ -27,6 +27,9 @@ require "umbrellio-utils"
 
 require "nokogiri"
 require "nori"
+require "semantic_logger"
+
+require "rspec/json_matcher"
 
 Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
 
@@ -37,6 +40,8 @@ RSpec.configure do |config|
 
   config.disable_monkey_patching!
   config.expose_dsl_globally = true
+
+  config.include(RSpec::JsonMatcher)
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
