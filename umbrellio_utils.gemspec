@@ -42,4 +42,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "simplecov-lcov"
   spec.add_development_dependency "yard"
+  spec.add_development_dependency "timecop"
 end

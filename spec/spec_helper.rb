@@ -3,6 +3,7 @@
 require "bundler/setup"
 require "simplecov"
 require "simplecov-lcov"
+require "timecop"
 
 SimpleCov::Formatter::LcovFormatter.config do |c|
   c.report_with_single_file = true
