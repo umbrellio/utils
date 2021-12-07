@@ -10,7 +10,11 @@ describe UmbrellioUtils::Database do
     let(:table) { double("table") }
     let(:select_expr) { double("select_expression") }
 
-    before { Timecop.freeze("2021-12-06") }
+    # rubocop:disable Naming/VariableNumber
+    let(:table_name) { :temp_test_table_name_16387380000 }
+    # rubocop:enable Naming/VariableNumber
+
+    before { Timecop.freeze("2021-12-06 UTC") }
 
     before do
       stub_const("DB", double)
@@ -22,8 +26,8 @@ describe UmbrellioUtils::Database do
       allow(column_schema).to receive(:[]).with(:db_type).and_return("test_type")
 
       allow(DB).to receive(:drop_table?)
-      allow(DB).to receive(:create_table).with(:temp_test_table_name_16387380000, unlogged: true)
-      allow(DB).to receive(:[]).with(:temp_test_table_name_16387380000).and_return(table)
+      allow(DB).to receive(:create_table).with(table_name, unlogged: true)
+      allow(DB).to receive(:[]).with(table_name).and_return(table)
 
       allow(Sequel).to receive(:[]).with("test_table_name").and_return(table)
 
@@ -34,7 +38,7 @@ describe UmbrellioUtils::Database do
 
     specify do
       result = described_class.create_temp_table(dataset, primary_key: "test_primary_key")
-      expect(result).to eq(:temp_test_table_name_16387380000)
+      expect(result).to eq(table_name)
     end
   end
 end
