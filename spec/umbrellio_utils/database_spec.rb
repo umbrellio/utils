@@ -11,7 +11,7 @@ describe UmbrellioUtils::Database do
     let(:select_expr) { double("select_expression") }
 
     # rubocop:disable Naming/VariableNumber
-    let(:table_name) { :temp_test_table_name_16387380000 }
+    let(:table_name) { :temp_test_table_name_16387488000 }
     # rubocop:enable Naming/VariableNumber
 
     before { Timecop.freeze("2021-12-06 UTC") }
@@ -36,8 +36,11 @@ describe UmbrellioUtils::Database do
       allow(table).to receive(:insert).with(dataset)
     end
 
+    subject(:result) do
+      described_class.create_temp_table(dataset, primary_key: "test_primary_key")
+    end
+
     specify do
-      result = described_class.create_temp_table(dataset, primary_key: "test_primary_key")
       expect(result).to eq(table_name)
     end
   end
