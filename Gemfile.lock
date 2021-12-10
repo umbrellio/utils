@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    umbrellio-utils (0.4.1)
+    umbrellio-utils (0.4.2)
       memery (~> 1)
 
 GEM
@@ -151,4 +151,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   2.2.30
+   2.2.31
