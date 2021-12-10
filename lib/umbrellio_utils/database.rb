@@ -67,7 +67,9 @@ module UmbrellioUtils
       type = model.db_schema[primary_key][:db_type]
 
       DB.drop_table?(temp_table_name)
-      DB.create_table(temp_table_name) { column primary_key, type, primary_key: true }
+      DB.create_table(temp_table_name, unlogged: true) do
+        column primary_key, type, primary_key: true
+      end
 
       insert_ds = dataset.select(Sequel[model.table_name][primary_key])
       DB[temp_table_name].insert(insert_ds)
