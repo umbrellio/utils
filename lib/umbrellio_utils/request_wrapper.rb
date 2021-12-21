@@ -53,7 +53,7 @@ module UmbrellioUtils
     attr_accessor :request
 
     def parse_params
-      case request.content_type
+      case request.media_type
       when "application/json"
         Parsing.safely_parse_json(body)
       when "application/xml"
