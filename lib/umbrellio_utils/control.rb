@@ -21,9 +21,9 @@ module UmbrellioUtils
     def retry_on_unique_violation(
       times: Float::INFINITY, retry_on_all_constraints: false, checked_constraints: [], &block
     )
-      use_savepoint = retry_on_all_constraints || checked_constraints.present?
+      use_transaction = retry_on_all_constraints || checked_constraints.present?
       retry_on(Sequel::UniqueConstraintViolation, times: times) do
-        DB.transaction(savepoint: use_savepoint, &block)
+        use_transaction ? DB.transaction(savepoint: true, &block) : yield
       rescue Sequel::UniqueConstraintViolation => e
         constraint_name = Database.get_violated_constraint_name(e)
 

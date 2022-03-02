@@ -35,11 +35,10 @@ describe UmbrellioUtils::Control do
     end
     before { stub_const("Sequel::UniqueConstraintViolation", Class.new(StandardError)) }
 
-    it "doesn't use savepoint in transaction" do
+    it "doesn't use transaction" do
       run!
 
-      expect(transaction_kwargs.size).to eq(1)
-      expect(transaction_kwargs.first[:savepoint]).to eq(false)
+      expect(transaction_kwargs.size).to eq(0)
     end
 
     context "when some random error is raised" do
@@ -59,7 +58,7 @@ describe UmbrellioUtils::Control do
       it "raises UniqueConstraintViolation" do
         expect { run! }.to raise_error(described_class::UniqueConstraintViolation, "msg")
 
-        expect(transaction_kwargs.size).to eq(1)
+        expect(transaction_kwargs.size).to eq(0)
       end
 
       context "when retrying on all constraints" do
