@@ -53,3 +53,23 @@ jobs:
           bundler-cache: true
       - name: Run specs
         run: bundle exec rspec
+
+  coverage-report:
+    runs-on: ubuntu-latest
+
+    # Test
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'umbrellio/utils'
+    needs: full-check
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0.3
+          bundler-cache: true
+      - name: Run specs
+        run: bundle exec ci-helper RunSpecs
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
