@@ -57,7 +57,7 @@ jobs:
   coverage-report:
     runs-on: ubuntu-latest
 
-    # Test
+    # Need to run coveralls on the pull_request event to publish coverage to the Coveralls
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'umbrellio/utils'
 
     steps:
