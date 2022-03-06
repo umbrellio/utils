@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3
+          ruby-version: 3.0.3
           bundler-cache: true
       - name: Run Linter
         run: bundle exec ci-helper RubocopLint
@@ -53,3 +53,22 @@ jobs:
           bundler-cache: true
       - name: Run specs
         run: bundle exec rspec
+
+  coverage-report:
+    runs-on: ubuntu-latest
+
+    # Need to run coveralls on the pull_request event to publish coverage to the Coveralls
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'umbrellio/utils'
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0.3
+          bundler-cache: true
+      - name: Run specs
+        run: bundle exec ci-helper RunSpecs
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
