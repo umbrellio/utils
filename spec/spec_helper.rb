@@ -31,8 +31,6 @@ require "timecop"
 
 require "umbrellio-utils"
 
-require_relative "utils/database"
-
 Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
 
 RSpec.configure do |config|
@@ -52,4 +50,17 @@ RSpec.configure do |config|
   config.before(:suite) do
     Time.zone = "UTC"
   end
+
+  config.after(:suite) do
+    DB.tables.each do |table_name|
+      DB.drop_table?(table_name, cascade: true)
+    end
+  end
+
+  config.around do |spec|
+    DB.transaction(rollback: :always, &spec)
+  end
+
+  config.order = :random
+  Kernel.srand config.seed
 end

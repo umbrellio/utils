@@ -44,4 +44,62 @@ describe UmbrellioUtils::Database do
       expect(result).to eq(table_name)
     end
   end
+
+  describe "#each_record" do
+    before do
+      User.multi_insert(users_data)
+      allow(Kernel).to receive(:sleep) { |value| sleep_calls << value }
+    end
+
+    let(:sleep_calls) { [] }
+    let(:options) { Hash[] }
+
+    let(:users_data) do
+      Array.new(10) { |index| Hash[email: "#{index}@email.com"] }
+    end
+
+    let(:reversed_emails) { users_data.pluck(:email).reverse }
+
+    subject(:result_emails) do
+      users = []
+
+      UmbrellioUtils::Database.each_record(User.dataset, **options) do |user|
+        users << user
+      end
+
+      users.map(&:email)
+    end
+
+    it "yields each record in reversed order" do
+      expect(result_emails).to eq(reversed_emails)
+      expect(sleep_calls).to eq([])
+    end
+
+    context "smaller page_size and numeric sleep value" do
+      let(:options) { Hash[page_size: 3, sleep: 10] }
+
+      it "calls Kernel.sleep between pages" do
+        expect(result_emails).to eq(reversed_emails)
+        expect(sleep_calls).to eq([10, 10, 10, 10])
+      end
+    end
+
+    context "production Rails env" do
+      before { allow(Rails).to receive(:env).and_return("production".inquiry) }
+
+      it "calls Kernel.sleep" do
+        expect(result_emails).to eq(reversed_emails)
+        expect(sleep_calls).to eq([1])
+      end
+
+      context "false sleep option" do
+        let(:options) { Hash[sleep: false] }
+
+        it "doesn't call Kernel.sleep" do
+          expect(result_emails).to eq(reversed_emails)
+          expect(sleep_calls).to eq([])
+        end
+      end
+    end
+  end
 end
