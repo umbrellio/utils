@@ -34,12 +34,10 @@ GEM
     memery (1.4.1)
       ruby2_keywords (~> 0.0.2)
     method_source (1.0.0)
+    mini_portile2 (2.6.1)
     minitest (5.14.4)
-    nokogiri (1.12.5-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.12.5-x86_64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.12.5-x86_64-linux)
+    nokogiri (1.12.5)
+      mini_portile2 (~> 2.6.1)
       racc (~> 1.4)
     nori (2.6.0)
     parallel (1.21.0)
@@ -129,6 +127,7 @@ GEM
 PLATFORMS
   arm64-darwin-20
   arm64-darwin-21
+  ruby
   x86_64-darwin-20
   x86_64-linux
 
@@ -152,4 +151,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   2.3.0
+   2.3.19

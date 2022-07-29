@@ -6,7 +6,7 @@ module UmbrellioUtils
 
     HandledConstaintError = Class.new(StandardError)
 
-    DEFAULT_SLEEP_INTERVAL = Rails.env.production? ? 1 : 0
+    DEFAULT_SLEEP_INTERVAL = defined?(Rails) && Rails.env.production? ? 1 : 0
 
     def handle_constraint_error(constraint_name, &block)
       DB.transaction(savepoint: true, &block)
@@ -33,16 +33,7 @@ module UmbrellioUtils
 
     def with_temp_table(dataset, page_size: 1_000, sleep: nil, **options)
       primary_key = primary_key_from(**options)
-
-      sleep_interval =
-        case sleep
-        when Numeric
-          sleep
-        when FalseClass
-          0
-        else
-          DEFAULT_SLEEP_INTERVAL
-        end
+      sleep_interval = sleep_interval_from(sleep)
 
       temp_table_name = create_temp_table(dataset, primary_key: primary_key)
 
@@ -91,6 +82,17 @@ module UmbrellioUtils
 
     def primary_key_from(**options)
       options.fetch(:primary_key, :id)
+    end
+
+    def sleep_inteval_from(sleep)
+      case sleep
+      when Numeric
+        sleep
+      when FalseClass
+        0
+      else
+        DEFAULT_SLEEP_INTERVAL
+      end
     end
   end
 end
