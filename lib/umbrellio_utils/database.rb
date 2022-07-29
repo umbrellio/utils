@@ -33,7 +33,16 @@ module UmbrellioUtils
 
     def with_temp_table(dataset, page_size: 1_000, sleep: nil, **options)
       primary_key = primary_key_from(**options)
-      sleep_interval = sleep || DEFAULT_SLEEP_INTERVAL
+
+      sleep_interval =
+        case sleep
+        when Numeric
+          sleep
+        when FalseClass
+          0
+        else
+          DEFAULT_SLEEP_INTERVAL
+        end
 
       temp_table_name = create_temp_table(dataset, primary_key: primary_key)
 
