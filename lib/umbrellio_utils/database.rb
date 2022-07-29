@@ -6,6 +6,8 @@ module UmbrellioUtils
 
     HandledConstaintError = Class.new(StandardError)
 
+    DEFAULT_SLEEP_INTERVAL = defined?(Rails) && Rails.env.production? ? 1 : 0
+
     def handle_constraint_error(constraint_name, &block)
       DB.transaction(savepoint: true, &block)
     rescue Sequel::UniqueConstraintViolation => e
@@ -22,16 +24,16 @@ module UmbrellioUtils
     end
 
     def each_record(dataset, **options, &block)
-      primary_key = primary_key_from(options)
+      primary_key = primary_key_from(**options)
+
       with_temp_table(dataset, **options) do |ids|
         dataset.model.where(primary_key => ids).each(&block)
       end
     end
 
-    def with_temp_table(dataset, **options)
-      primary_key = primary_key_from(options)
-      page_size = options.fetch(:page_size, 1_000)
-      do_sleep = options.fetch(:sleep, Rails.env.production?)
+    def with_temp_table(dataset, page_size: 1_000, sleep: nil, **options)
+      primary_key = primary_key_from(**options)
+      sleep_interval = sleep_interval_from(sleep)
 
       temp_table_name = create_temp_table(dataset, primary_key: primary_key)
 
@@ -49,7 +51,7 @@ module UmbrellioUtils
 
         break if pk_set.empty?
 
-        sleep(1) if do_sleep
+        sleep(sleep_interval) if sleep_interval.positive?
         clear_lamian_logs!
       end
     ensure
@@ -78,8 +80,19 @@ module UmbrellioUtils
 
     private
 
-    def primary_key_from(options)
+    def primary_key_from(**options)
       options.fetch(:primary_key, :id)
+    end
+
+    def sleep_inteval_from(sleep)
+      case sleep
+      when Numeric
+        sleep
+      when FalseClass
+        0
+      else
+        DEFAULT_SLEEP_INTERVAL
+      end
     end
   end
 end
