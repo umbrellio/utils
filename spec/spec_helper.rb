@@ -51,12 +51,6 @@ RSpec.configure do |config|
     Time.zone = "UTC"
   end
 
-  config.after(:suite) do
-    DB.tables.each do |table_name|
-      DB.drop_table?(table_name, cascade: true)
-    end
-  end
-
   config.around do |spec|
     DB.transaction(rollback: :always, &spec)
   end
