@@ -84,7 +84,7 @@ module UmbrellioUtils
       options.fetch(:primary_key, :id)
     end
 
-    def sleep_inteval_from(sleep)
+    def sleep_interval_from(sleep)
       case sleep
       when Numeric
         sleep
