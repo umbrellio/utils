@@ -21,3 +21,6 @@ Naming/RescuedExceptionsVariableName:
 Style/HashConversion:
   Exclude:
     - spec/**/*_spec.rb
+
+Naming/VariableNumber:
+  CheckSymbols: false
