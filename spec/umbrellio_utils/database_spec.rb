@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe UmbrellioUtils::Database do
+describe UmbrellioUtils::Database, db: true do
   describe "#create_temp_table" do
     before do
       Timecop.freeze("2021-12-06 UTC")

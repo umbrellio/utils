@@ -52,7 +52,11 @@ RSpec.configure do |config|
   end
 
   config.around do |spec|
-    DB.transaction(rollback: :always, &spec)
+    if spec.metadata[:db]
+      DB.transaction(rollback: :always, &spec)
+    else
+      spec.call
+    end
   end
 
   config.order = :random
