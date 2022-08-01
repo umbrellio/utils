@@ -39,7 +39,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.1"
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
       - run: psql -c 'CREATE DATABASE umbrellio_utils_test'
