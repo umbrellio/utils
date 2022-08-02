@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 
-require "bundler/setup"
 require "simplecov"
 require "simplecov-lcov"
-require "timecop"
 
-SimpleCov::Formatter::LcovFormatter.config do |c|
-  c.report_with_single_file = true
-  c.lcov_file_name = "lcov.info"
-  c.output_directory = "coverage"
+SimpleCov::Formatter::LcovFormatter.config do |config|
+  config.report_with_single_file = true
+  config.single_report_path = "coverage/lcov.info"
 end
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
@@ -22,14 +19,17 @@ SimpleCov.enable_coverage(:line)
 SimpleCov.add_filter "spec"
 SimpleCov.start
 
-require "active_support/all"
-require "umbrellio-utils"
+require "bundler/setup"
 
+require "active_support/all"
 require "nokogiri"
 require "nori"
-require "semantic_logger"
-
 require "rspec/json_matcher"
+require "semantic_logger"
+require "sequel"
+require "timecop"
+
+require "umbrellio-utils"
 
 Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
 
@@ -50,4 +50,15 @@ RSpec.configure do |config|
   config.before(:suite) do
     Time.zone = "UTC"
   end
+
+  config.around do |spec|
+    if spec.metadata[:db]
+      DB.transaction(rollback: :always, &spec)
+    else
+      spec.call
+    end
+  end
+
+  config.order = :random
+  Kernel.srand config.seed
 end

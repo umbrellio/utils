@@ -6,8 +6,6 @@ module UmbrellioUtils
 
     HandledConstaintError = Class.new(StandardError)
 
-    DEFAULT_SLEEP_INTERVAL = defined?(Rails) && Rails.env.production? ? 1 : 0
-
     def handle_constraint_error(constraint_name, &block)
       DB.transaction(savepoint: true, &block)
     rescue Sequel::UniqueConstraintViolation => e
@@ -27,7 +25,7 @@ module UmbrellioUtils
       primary_key = primary_key_from(**options)
 
       with_temp_table(dataset, **options) do |ids|
-        dataset.model.where(primary_key => ids).each(&block)
+        dataset.model.where(primary_key => ids).reverse(primary_key).each(&block)
       end
     end
 
@@ -51,7 +49,7 @@ module UmbrellioUtils
 
         break if pk_set.empty?
 
-        sleep(sleep_interval) if sleep_interval.positive?
+        Kernel.sleep(sleep_interval) if sleep_interval.positive?
         clear_lamian_logs!
       end
     ensure
@@ -59,6 +57,7 @@ module UmbrellioUtils
     end
 
     def clear_lamian_logs!
+      return unless defined?(Lamian)
       Lamian.logger.send(:logdevs).each { |x| x.truncate(0) && x.rewind }
     end
 
@@ -91,7 +90,7 @@ module UmbrellioUtils
       when FalseClass
         0
       else
-        DEFAULT_SLEEP_INTERVAL
+        defined?(Rails) && Rails.env.production? ? 1 : 0
       end
     end
   end
