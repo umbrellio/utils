@@ -40,7 +40,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
       name: "SomeName",
       thread_fingerprint: "85bb6139",
       message: "Some Message",
-      time: "2007-01-01T00:00:00.000Z",
+      time: "2007-01-01T00:00:00.000000000Z",
       tags: [],
       named_tags: {},
     )
@@ -55,7 +55,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
         name: "SomeName",
         thread_fingerprint: "85bb6139",
         note: "Some Message",
-        timestamp: "2007-01-01T00:00:00.000Z",
+        timestamp: "2007-01-01T00:00:00.000000000Z",
         tags: [],
         named_tags: {},
       )
@@ -71,7 +71,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
         name: "SomeName",
         thread_fingerprint: "85bb6139",
         message: "Some Message",
-        time: "2007-01-01T00:00:00.000Z",
+        time: "2007-01-01T00:00:00.000000000Z",
         tags: [],
         named_tags: {},
       )
@@ -88,7 +88,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
         name: "SomeName",
         thread_fingerprint: "85bb6139",
         message: "Some Message",
-        time: "2007-01-01T00:00:00.000Z",
+        time: "2007-01-01T00:00:00.000000000Z",
         tags: ["kek"],
         named_tags: { id: "very-long-id" },
       )
