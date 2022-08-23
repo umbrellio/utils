@@ -73,7 +73,7 @@ module UmbrellioUtils
           log.message,
           log.tags,
           log.named_tags,
-          log.time.utc.iso8601(3),
+          log.time.utc.iso8601(9),
         ]
       end
 
