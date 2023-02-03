@@ -73,7 +73,8 @@ module UmbrellioUtils
       end
 
       insert_ds = dataset.select(Sequel[model.table_name][primary_key])
-      DB[temp_table_name].insert(insert_ds)
+      DB[temp_table_name].disable_insert_returning.insert(insert_ds)
+
       temp_table_name
     end
 
