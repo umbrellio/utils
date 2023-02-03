@@ -6,7 +6,7 @@ module UmbrellioUtils
 
     VOWELS_REGEX = /[AEIOUY]/.freeze
     CONSONANTS_REGEX = /[BCDFGHJKLMNPQRSTVXZW]/.freeze
-    EMAIL_REGEXP = /\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i.freeze
+    EMAIL_REGEXP = /\A([\w+-].?)+@[a-z\d-]+(\.[a-z]+)*\.[a-z]+\z/i.freeze
 
     def secure_compare(src, dest)
       ActiveSupport::SecurityUtils.secure_compare(

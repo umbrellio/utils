@@ -14,7 +14,7 @@ describe UmbrellioUtils::Database, db: true do
       ]
     end
 
-    let(:table_name) { :temp_users_16387488000 }
+    let(:table_name) { :temp_users_1638748800_0 }
 
     subject(:result) do
       described_class.create_temp_table(User.dataset, primary_key: :id)
