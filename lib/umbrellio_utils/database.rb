@@ -64,7 +64,7 @@ module UmbrellioUtils
     def create_temp_table(dataset, primary_key:)
       model = dataset.model
       time = Time.current
-      temp_table_name = "temp_#{model.table_name}_#{time.to_i}#{time.nsec}".to_sym
+      temp_table_name = "temp_#{model.table_name}_#{time.to_i}_#{time.nsec}".to_sym
       type = model.db_schema[primary_key][:db_type]
 
       DB.drop_table?(temp_table_name)
