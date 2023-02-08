@@ -6,14 +6,15 @@ module UmbrellioUtils
 
     def table_sync(scope, delay: 1, routing_key: nil)
       scope.in_batches do |batch|
-        batch.each do |model|
-          next if model.try(:skip_table_sync?)
+        batch_for_sync = batch.all.reject { |model| model.try(:skip_table_sync?) }
+        next if batch_for_sync.empty?
 
-          values = [model.class.name, model.values]
-          publisher = TableSync::Publishing::Publisher.new(*values, confirm: false)
-          publisher.routing_key = routing_key if routing_key
-          publisher.publish_now
-        end
+        model_class = batch_for_sync.first.class.name
+        TableSync::Publishing::Batch.new(
+          object_class: model_class,
+          original_attributes: batch_for_sync.map { |model| model.values },
+          routing_key: routing_key,
+        ).publish_now
 
         sleep delay
       end
