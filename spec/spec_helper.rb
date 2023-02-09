@@ -29,6 +29,7 @@ require "semantic_logger"
 require "sequel"
 require "table_sync"
 require "timecop"
+
 require "umbrellio-utils"
 
 Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
