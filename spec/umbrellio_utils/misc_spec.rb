@@ -35,7 +35,7 @@ describe UmbrellioUtils::Misc do
       User.create(email: "user1@mail.com")
       User.create(email: "user2@mail.com")
       Array.alias_method(:in_batches, :each)
-      stub_const("TableSync::Publishing::Batch", table_sync_stub)
+      allow(TableSync::Publishing::Batch).to receive(:new).and_return(publisher)
     end
 
     let(:users) do
@@ -45,14 +45,11 @@ describe UmbrellioUtils::Misc do
       ]
     end
 
-    let(:table_sync_stub) do
-      class_double("TableSync::Publishing::Batch").tap do |klass|
-        allow(klass).to receive(:new).and_return(publisher)
-      end
-    end
-
     let(:publisher) do
-      instance_double("TableSync::Publishing::Batch").tap do |instance|
+      TableSync::Publishing::Batch.new(
+        object_class: "User",
+        original_attributes: [{ some: "data" }],
+      ).tap do |instance|
         allow(instance).to receive(:publish_now)
       end
     end
