@@ -70,7 +70,7 @@ module UmbrellioUtils
           log.level.upcase,
           log.name,
           thread_fingerprint_for(log),
-          log.message,
+          log_to_message(log),
           log.tags,
           log.named_tags,
           log.time.utc.iso8601(9),
@@ -81,6 +81,14 @@ module UmbrellioUtils
       # @return [String] truncated `MD5` hash.
       def thread_fingerprint_for(log)
         Digest::MD5.hexdigest("#{log.thread_name}#{Process.pid}")[0...8]
+      end
+
+      def log_to_message(log)
+        if (e = log.exception)
+          "#{e.message} (#{e.class})\n#{e.backtrace.join("\n") if e.backtrace}"
+        else
+          log.message
+        end
       end
     end
   end
