@@ -98,20 +98,34 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
   end
 
   context "with exception" do
-    let(:log_exception) do
-      RuntimeError.new("Error!").tap { |x| x.set_backtrace(%w[1 2 3]) }
-    end
+    let(:log_exception) { RuntimeError.new("Error!") }
 
-    it "renders exception with backtrace" do
+    it "renders exception" do
       expect(result).to be_json_as(
         severity: "DEBUG",
         name: "SomeName",
         thread_fingerprint: "85bb6139",
-        message: "Error! (RuntimeError)\n1\n2\n3",
+        message: "Error! (RuntimeError)",
         time: "2007-01-01T00:00:00.000000000Z",
         tags: [],
         named_tags: {},
       )
+    end
+
+    context "exception with a backtrace" do
+      before { log_exception.set_backtrace(%w[1 2 3]) }
+
+      it "renders exception with backtrace" do
+        expect(result).to be_json_as(
+          severity: "DEBUG",
+          name: "SomeName",
+          thread_fingerprint: "85bb6139",
+          message: "Error! (RuntimeError)\n1\n2\n3",
+          time: "2007-01-01T00:00:00.000000000Z",
+          tags: [],
+          named_tags: {},
+        )
+      end
     end
   end
 end

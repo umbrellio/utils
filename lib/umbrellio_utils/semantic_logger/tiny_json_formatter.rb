@@ -85,7 +85,9 @@ module UmbrellioUtils
 
       def log_to_message(log)
         if (e = log.exception)
-          "#{e.message} (#{e.class})\n#{e.backtrace.join("\n") if e.backtrace}"
+          msg = "#{e.message} (#{e.class})"
+          msg << "\n#{e.backtrace.join("\n")}" if e.backtrace
+          msg
         else
           log.message
         end
