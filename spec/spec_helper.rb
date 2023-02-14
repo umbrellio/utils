@@ -29,10 +29,20 @@ require "semantic_logger"
 require "sequel"
 require "table_sync"
 require "timecop"
+require "rabbit/test_helpers"
 
 require "umbrellio-utils"
 
 Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
+
+TableSync.orm = :sequel
+TableSync.headers_callable = -> (_klass, attributes) { attributes.slice(:id) }
+
+Rabbit.configure do |config|
+  config.project_id = :umbrellio_utils
+  config.group_id = :umbrellio_utils
+  config.environment = :test
+end
 
 RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
@@ -43,6 +53,7 @@ RSpec.configure do |config|
   config.expose_dsl_globally = true
 
   config.include(RSpec::JsonMatcher)
+  config.include(Rabbit::TestHelpers)
 
   config.expect_with :rspec do |c|
     c.syntax = :expect

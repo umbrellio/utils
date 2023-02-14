@@ -20,22 +20,31 @@ describe UmbrellioUtils::Misc do
 
   describe "::table_sync" do
     def run!
-      described_class.table_sync(users)
+      described_class.table_sync(users, routing_key: :umbrellio_utils)
     end
 
-    def expect_user_publishing(user_id)
-      expect(TableSync::Publishing::Batch).to have_received(:new).with(
-        object_class: "User",
-        original_attributes: [{ id: user_id, email: "user#{user_id}@mail.com" }],
-        routing_key: nil,
-      )
+    def rabbit_data(user_id:)
+      {
+        confirm_select: true,
+        data: {
+          attributes: [{ email: "user#{user_id}@mail.com", id: user_id }],
+          event: :update,
+          metadata: { created: false },
+          model: "User",
+          version: Numeric,
+        },
+        event: :table_sync,
+        exchange_name: nil,
+        headers: {},
+        realtime: true,
+        routing_key: :umbrellio_utils,
+      }
     end
 
     before do
       User.create(email: "user1@mail.com")
       User.create(email: "user2@mail.com")
       Array.alias_method(:in_batches, :each)
-      allow(TableSync::Publishing::Batch).to receive(:new).and_return(publisher)
     end
 
     let(:users) do
@@ -45,26 +54,16 @@ describe UmbrellioUtils::Misc do
       ]
     end
 
-    let(:publisher) do
-      TableSync::Publishing::Batch.new(
-        object_class: "User",
-        original_attributes: [{ some: "data" }],
-      ).tap do |instance|
-        allow(instance).to receive(:publish_now)
-      end
-    end
-
     context "without skipped users" do
       before do
         User.define_method(:skip_table_sync?) { false }
       end
 
       it "publishes all data" do
-        run!
+        expect_rabbit_message(rabbit_data(user_id: 1))
+        expect_rabbit_message(rabbit_data(user_id: 2))
 
-        expect_user_publishing(1)
-        expect_user_publishing(2)
-        expect(publisher).to have_received(:publish_now).exactly(2).times
+        run!
       end
     end
 
@@ -76,10 +75,10 @@ describe UmbrellioUtils::Misc do
       end
 
       it "publishes only second user's data" do
-        run!
+        expect_rabbit_message(rabbit_data(user_id: 2))
+        expect(Rabbit).not_to receive(:publish).with(rabbit_data(user_id: 1))
 
-        expect_user_publishing(2)
-        expect(publisher).to have_received(:publish_now)
+        run!
       end
     end
   end
