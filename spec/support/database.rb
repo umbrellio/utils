@@ -15,6 +15,8 @@ DB.logger = Logger.new("log/db.log")
 
 Sequel::Model.db = DB
 
+DB.extension :batches
+
 DB.drop_table? :users
 DB.create_table :users do
   primary_key :id

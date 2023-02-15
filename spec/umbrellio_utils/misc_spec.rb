@@ -23,11 +23,16 @@ describe UmbrellioUtils::Misc do
       described_class.table_sync(users, routing_key: :umbrellio_utils)
     end
 
-    def rabbit_data(user_id:)
+    before do
+      User.create(email: "user1@mail.com")
+      User.create(email: "user2@mail.com")
+    end
+
+    let(:rabbit_data) do
       {
         confirm_select: true,
         data: {
-          attributes: [{ email: "user#{user_id}@mail.com", id: user_id }],
+          attributes: expected_rabbit_attributes,
           event: :update,
           metadata: { created: false },
           model: "User",
@@ -41,42 +46,52 @@ describe UmbrellioUtils::Misc do
       }
     end
 
-    before do
-      User.create(email: "user1@mail.com")
-      User.create(email: "user2@mail.com")
-      Array.alias_method(:in_batches, :each)
-    end
-
-    let(:users) do
-      [
-        User.where(id: 1),
-        User.where(id: 2),
-      ]
-    end
+    let(:users) { User.where(id: [1, 2]) }
 
     context "without skipped users" do
       before do
         User.define_method(:skip_table_sync?) { false }
       end
 
+      let(:expected_rabbit_attributes) do
+        [
+          { email: "user1@mail.com", id: 1 },
+          { email: "user2@mail.com", id: 2 },
+        ]
+      end
+
       it "publishes all data" do
-        expect_rabbit_message(rabbit_data(user_id: 1))
-        expect_rabbit_message(rabbit_data(user_id: 2))
+        expect_rabbit_message(rabbit_data)
 
         run!
       end
     end
 
-    context "with skipped users" do
+    context "when first user should be skipped" do
       before do
         User.define_method(:skip_table_sync?) do
           self.id == 1
         end
       end
 
+      let(:expected_rabbit_attributes) do
+        [{ email: "user2@mail.com", id: 2 }]
+      end
+
       it "publishes only second user's data" do
-        expect_rabbit_message(rabbit_data(user_id: 2))
-        expect(Rabbit).not_to receive(:publish).with(rabbit_data(user_id: 1))
+        expect_rabbit_message(rabbit_data)
+
+        run!
+      end
+    end
+
+    context "when all users should be skipped" do
+      before do
+        User.define_method(:skip_table_sync?) { true }
+      end
+
+      it "doesn't publish message" do
+        expect_no_rabbit_messages
 
         run!
       end

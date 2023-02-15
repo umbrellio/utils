@@ -43,6 +43,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop-config-umbrellio"
   spec.add_development_dependency "semantic_logger"
   spec.add_development_dependency "sequel"
+  spec.add_development_dependency "sequel-batches"
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "simplecov-lcov"
   spec.add_development_dependency "table_sync"
