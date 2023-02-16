@@ -12,7 +12,7 @@ module UmbrellioUtils
         model_class = batch_for_sync.first.class.name
         TableSync::Publishing::Batch.new(
           object_class: model_class,
-          original_attributes: batch_for_sync.map { |model| model.values },
+          original_attributes: batch_for_sync.map(&:values),
           routing_key: routing_key,
         ).publish_now
 
