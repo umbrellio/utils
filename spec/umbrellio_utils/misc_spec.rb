@@ -24,6 +24,7 @@ describe UmbrellioUtils::Misc do
     end
 
     before do
+      User.define_method(:skip_table_sync?) { nil }
       User.create(email: "user1@mail.com")
       User.create(email: "user2@mail.com")
     end
@@ -50,7 +51,7 @@ describe UmbrellioUtils::Misc do
 
     context "without skipped users" do
       before do
-        User.define_method(:skip_table_sync?) { false }
+        allow_any_instance_of(User).to receive(:skip_table_sync?).and_return(false)
       end
 
       let(:expected_rabbit_attributes) do
@@ -69,8 +70,8 @@ describe UmbrellioUtils::Misc do
 
     context "when first user should be skipped" do
       before do
-        User.define_method(:skip_table_sync?) do
-          self.id == 1
+        allow_any_instance_of(User).to receive(:skip_table_sync?) do |user|
+          user.id == 1
         end
       end
 
@@ -87,7 +88,7 @@ describe UmbrellioUtils::Misc do
 
     context "when all users should be skipped" do
       before do
-        User.define_method(:skip_table_sync?) { true }
+        allow_any_instance_of(User).to receive(:skip_table_sync?).and_return(true)
       end
 
       it "doesn't publish message" do

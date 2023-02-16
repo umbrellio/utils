@@ -24,12 +24,12 @@ require "bundler/setup"
 require "active_support/all"
 require "nokogiri"
 require "nori"
-require "rabbit/test_helpers"
 require "rspec/json_matcher"
 require "semantic_logger"
 require "sequel"
 require "table_sync"
 require "timecop"
+require "rabbit/test_helpers"
 
 require "umbrellio-utils"
 
