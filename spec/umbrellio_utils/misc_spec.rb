@@ -24,7 +24,6 @@ describe UmbrellioUtils::Misc do
     end
 
     before do
-      User.define_method(:skip_table_sync?) { nil }
       User.create(email: "user1@mail.com")
       User.create(email: "user2@mail.com")
     end
@@ -50,10 +49,6 @@ describe UmbrellioUtils::Misc do
     let(:users) { User.where(id: [1, 2]) }
 
     context "without skipped users" do
-      before do
-        allow_any_instance_of(User).to receive(:skip_table_sync?).and_return(false)
-      end
-
       let(:expected_rabbit_attributes) do
         [
           { email: "user1@mail.com", id: 1 },

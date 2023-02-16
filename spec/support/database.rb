@@ -24,4 +24,5 @@ DB.create_table :users do
 end
 
 class User < Sequel::Model(:users)
+  def skip_table_sync?; end
 end
