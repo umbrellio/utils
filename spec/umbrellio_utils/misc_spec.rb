@@ -28,6 +28,10 @@ describe UmbrellioUtils::Misc do
       User.create(email: "user2@mail.com")
     end
 
+    after do
+      User.where(email: ["user1@mail.com", "user2@mail.com"]).destroy
+    end
+
     let(:rabbit_data) do
       {
         confirm_select: true,
@@ -46,13 +50,13 @@ describe UmbrellioUtils::Misc do
       }
     end
 
-    let(:users) { User.where(id: [1, 2]) }
+    let(:users) { User.where(email: ["user1@mail.com", "user2@mail.com"]) }
 
     context "without skipped users" do
       let(:expected_rabbit_attributes) do
         [
-          { email: "user1@mail.com", id: 1 },
-          { email: "user2@mail.com", id: 2 },
+          { email: "user1@mail.com", id: Numeric },
+          { email: "user2@mail.com", id: Numeric },
         ]
       end
 
@@ -66,12 +70,12 @@ describe UmbrellioUtils::Misc do
     context "when first user should be skipped" do
       before do
         allow_any_instance_of(User).to receive(:skip_table_sync?) do |user|
-          user.id == 1
+          user.email == "user1@mail.com"
         end
       end
 
       let(:expected_rabbit_attributes) do
-        [{ email: "user2@mail.com", id: 2 }]
+        [{ email: "user2@mail.com", id: Numeric }]
       end
 
       it "publishes only second user's data" do
