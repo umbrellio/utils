@@ -15,6 +15,8 @@ DB.logger = Logger.new("log/db.log")
 
 Sequel::Model.db = DB
 
+DB.extension :batches
+
 DB.drop_table? :users
 DB.create_table :users do
   primary_key :id
@@ -22,4 +24,7 @@ DB.create_table :users do
 end
 
 class User < Sequel::Model(:users)
+  def skip_table_sync?
+    false
+  end
 end
