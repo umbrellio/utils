@@ -4,8 +4,6 @@ module UmbrellioUtils
   module Checks
     extend self
 
-    VOWELS_REGEX = /[AEIOUY]/.freeze
-    CONSONANTS_REGEX = /[BCDFGHJKLMNPQRSTVXZW]/.freeze
     EMAIL_REGEXP = /\A([\w+-].?)+@[a-z\d-]+(\.[a-z]+)*\.[a-z]+\z/i.freeze
 
     def secure_compare(src, dest)
@@ -40,7 +38,6 @@ module UmbrellioUtils
       return if words.any? { |x| x.match?(/(.+)(\1)(\1)/) }
       return unless words.all? { |x| x.size >= 2 }
       return unless words.all? { |x| x.match?(/\A[A-Z]+\z/) }
-      return unless words.all? { |x| x.match?(VOWELS_REGEX) && x.match?(CONSONANTS_REGEX) }
 
       true
     end
