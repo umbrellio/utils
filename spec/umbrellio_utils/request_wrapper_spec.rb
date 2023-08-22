@@ -63,21 +63,21 @@ describe UmbrellioUtils::RequestWrapper do
     context "with other content-type" do
       context "with POST method" do
         let(:content_type) { "application/x-www-form-urlencoded" }
-        let(:request_body) { "txid=txid&parentTxid=parent+txid" }
+        let(:request_body) { "some=value&key=another+value" }
         let(:request_method) { "POST" }
 
         specify do
-          expect(wrapped_request.params).to eq({ "txid" => "txid", "parentTxid" => "parent txid" })
+          expect(wrapped_request.params).to eq({ "some" => "value", "key" => "another value" })
         end
       end
 
       context "with GET method" do
         let(:content_type) { nil }
-        let(:query_string) { "type=deposit&status=success" }
+        let(:query_string) { "code=123&status=success" }
         let(:request_body) { "" }
 
         specify do
-          expect(wrapped_request.params).to eq({ "type" => "deposit", "status" => "success" })
+          expect(wrapped_request.params).to eq({ "code" => "123", "status" => "success" })
         end
       end
     end
