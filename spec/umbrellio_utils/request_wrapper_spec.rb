@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "pry"
-
 describe UmbrellioUtils::RequestWrapper do
   subject(:wrapped_request) { described_class.new(request) }
 
