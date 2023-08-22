@@ -10,6 +10,7 @@ group :development, :test do
   gem "bundler"
   gem "bundler-audit"
   gem "ci-helper"
+  gem "http"
   gem "nokogiri"
   gem "nori"
   gem "pg"
