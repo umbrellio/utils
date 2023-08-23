@@ -54,7 +54,7 @@ module UmbrellioUtils
 
     def parse_params
       case request.media_type
-      when "application/json"
+      when "application/json", /\+json\z/
         Parsing.safely_parse_json(body)
       when "application/xml"
         Parsing.parse_xml(body)

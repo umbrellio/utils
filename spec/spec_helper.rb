@@ -22,6 +22,7 @@ SimpleCov.start
 require "bundler/setup"
 
 require "active_support/all"
+require "http"
 require "nokogiri"
 require "nori"
 require "rspec/json_matcher"
