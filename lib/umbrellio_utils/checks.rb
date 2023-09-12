@@ -5,6 +5,7 @@ module UmbrellioUtils
     extend self
 
     EMAIL_REGEXP = /\A([\w+-].?)+@[a-z\d-]+(\.[a-z]+)*\.[a-z]+\z/i.freeze
+    HOLDER_NAME_REGEXP = /\A([A-Za-z0-9.'-]+ ?)+\z/.freeze
 
     def secure_compare(src, dest)
       ActiveSupport::SecurityUtils.secure_compare(
@@ -33,13 +34,7 @@ module UmbrellioUtils
     end
 
     def valid_card_holder?(holder)
-      words = holder.to_s.split
-      return if words.count != 2
-      return if words.any? { |x| x.match?(/(.+)(\1)(\1)/) }
-      return unless words.all? { |x| x.size >= 2 }
-      return unless words.all? { |x| x.match?(/\A[A-Z]+\z/) }
-
-      true
+      holder.to_s =~ HOLDER_NAME_REGEXP
     end
 
     def valid_card_cvv?(cvv)
