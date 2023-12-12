@@ -4,8 +4,9 @@ module UmbrellioUtils
   class RequestWrapper
     include Memery
 
-    def initialize(request)
+    def initialize(request, remove_xml_attributes: true)
       self.request = request
+      self.remove_xml_attributes = remove_xml_attributes
     end
 
     memoize def params
@@ -50,14 +51,14 @@ module UmbrellioUtils
 
     private
 
-    attr_accessor :request
+    attr_accessor :request, :remove_xml_attributes
 
     def parse_params
       case request.media_type
       when "application/json", /\+json\z/
         Parsing.safely_parse_json(body)
       when "application/xml"
-        Parsing.parse_xml(body)
+        Parsing.parse_xml(body, remove_attributes: remove_xml_attributes)
       else
         request.get? ? request.GET : request.POST
       end
