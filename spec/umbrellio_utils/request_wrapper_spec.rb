@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 describe UmbrellioUtils::RequestWrapper do
-  subject(:wrapped_request) { described_class.new(request, remove_xml_attributes:) }
+  subject(:wrapped_request) do
+    described_class.new(request, remove_xml_attributes: remove_xml_attributes)
+  end
 
   let(:request_body) { Hash[some: "value"].to_json }
   let(:content_type) { "application/json" }
@@ -37,12 +39,19 @@ describe UmbrellioUtils::RequestWrapper do
     context "with application/xml content-type" do
       let(:content_type) { "application/xml" }
       let(:request_body) do
-        "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" \
-          "<transaction><expiryDate month=\"02\" year=\"2024\"/><description>123</description></transaction>"
+        <<~XML
+          <?xml version="1.0" encoding="UTF-8" ?>
+          <transaction>
+            <expiryDate month="02" year="2024"/>
+            <description>123</description>
+          </transaction>
+        XML
       end
 
       specify do
-        expect(wrapped_request.params).to eq({ transaction: { expiry_date: nil, description: "123" } })
+        expect(wrapped_request.params).to eq({
+          transaction: { expiry_date: nil, description: "123" },
+        })
       end
 
       context "with invalid xml" do
