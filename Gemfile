@@ -8,7 +8,6 @@ gemspec
 group :development, :test do
   gem "activesupport"
   gem "bundler"
-  gem "bundler-audit"
   gem "ci-helper"
   gem "http"
   gem "nokogiri"
