@@ -3,6 +3,7 @@
 describe UmbrellioUtils::Rounding do
   describe "#fancy_round" do
     subject(:rounded_number) { described_class.fancy_round(number, **kwargs) }
+
     let(:number) { 122.12 }
     let(:kwargs) { Hash[] }
 
@@ -31,6 +32,7 @@ describe UmbrellioUtils::Rounding do
 
   describe "#super_round" do
     subject(:rounded_number) { described_class.super_round(number, **kwargs) }
+
     let(:number) { 3221.53 }
     let(:kwargs) { Hash[] }
 
@@ -45,7 +47,7 @@ describe UmbrellioUtils::Rounding do
     end
 
     context "with specific targets passed in params" do
-      let(:kwargs) { Hash[targets: [1.5, 2.5, 3.5, 5.0, ]] }
+      let(:kwargs) { Hash[targets: [1.5, 2.5, 3.5, 5.0]] }
 
       specify { expect(rounded_number).to eq(3500.0) }
     end
