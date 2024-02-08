@@ -10,7 +10,7 @@ group :development, :test do
   gem "bundler"
   gem "ci-helper"
   gem "http"
-  gem "nokogiri"
+  gem "nokogiri", "~> 1.15.0"
   gem "nori"
   gem "pg"
   gem "pry"
