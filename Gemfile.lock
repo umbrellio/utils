@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    umbrellio-utils (0.7.4)
+    umbrellio-utils (0.7.5)
       memery (~> 1)
 
 GEM
