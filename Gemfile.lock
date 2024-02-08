@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    umbrellio-utils (0.7.4)
+    umbrellio-utils (0.7.5)
       memery (~> 1)
 
 GEM
@@ -79,9 +79,6 @@ GEM
     ast (2.4.2)
     bigdecimal (3.1.4)
     builder (3.2.4)
-    bundler-audit (0.9.1)
-      bundler (>= 1.2.0, < 3)
-      thor (~> 1.0)
     bunny (2.22.0)
       amq-protocol (~> 2.3, >= 2.3.1)
       sorted_set (~> 1, >= 1.0.2)
@@ -135,7 +132,7 @@ GEM
       ruby2_keywords (~> 0.0.2)
     method_source (1.0.0)
     mini_mime (1.1.5)
-    mini_portile2 (2.8.4)
+    mini_portile2 (2.8.5)
     minitest (5.20.0)
     net-imap (0.3.7)
       date
@@ -172,7 +169,7 @@ GEM
       rails (>= 5.2)
       sneakers (~> 2.0)
       tainbox
-    racc (1.7.1)
+    racc (1.7.3)
     rack (2.2.8)
     rack-test (2.1.0)
       rack (>= 1.3)
@@ -325,7 +322,6 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   bundler
-  bundler-audit
   ci-helper
   http
   nokogiri

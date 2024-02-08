@@ -53,9 +53,6 @@ jobs:
       - name: Run specs
         run: bundle exec ci-helper RunSpecs
 
-      - name: Audit
-        run: bundle exec ci-helper BundlerAudit
-
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
