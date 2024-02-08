@@ -328,7 +328,7 @@ DEPENDENCIES
   bundler-audit
   ci-helper
   http
-  nokogiri (= 1.15.5)
+  nokogiri
   nori
   pg
   pry
