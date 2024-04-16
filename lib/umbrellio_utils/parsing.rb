@@ -9,7 +9,7 @@ module UmbrellioUtils
       HTTP_X_HTTP_AUTHORIZATION
       HTTP_REDIRECT_X_HTTP_AUTHORIZATION
     ].freeze
-    CARD_TRUNCATED_PAN_REGEX = /\A(\d{6}).*(\d{4})\z/.freeze
+    CARD_TRUNCATED_PAN_REGEX = /\A(\d{6}).*(\d{4})\z/
 
     def try_to_parse_as_json(data)
       JSON.parse(data) rescue data

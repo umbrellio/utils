@@ -4,8 +4,8 @@ module UmbrellioUtils
   module Checks
     extend self
 
-    EMAIL_REGEXP = /\A([\w+-].?)+@[a-z\d-]+(\.[a-z]+)*\.[a-z]+\z/i.freeze
-    HOLDER_NAME_REGEXP = /\A([A-Za-z0-9.'-]+ ?)+\z/.freeze
+    EMAIL_REGEXP = /\A([\w+-].?)+@[a-z\d-]+(\.[a-z]+)*\.[a-z]+\z/i
+    HOLDER_NAME_REGEXP = /\A([A-Za-z0-9.'-]+ ?)+\z/
 
     def secure_compare(src, dest)
       ActiveSupport::SecurityUtils.secure_compare(
