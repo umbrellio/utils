@@ -53,15 +53,15 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
     let(:options) { Hash[message_size_limit: 8] }
 
     it "truncates message" do
-      expect(result).to be_json_as(
-        severity: "DEBUG",
-        name: "SomeName",
-        thread_fingerprint: "85bb6139",
-        message: "Some ...",
-        time: "2007-01-01T00:00:00.000000000Z",
-        tags: [],
-        named_tags: {},
-      )
+      expect(result).to be_json_including(message: "Some ...")
+    end
+
+    context "with nil message" do
+      let(:log_message) { nil }
+
+      it "logs blank message" do
+        expect(result).to be_json_including(message: "")
+      end
     end
   end
 

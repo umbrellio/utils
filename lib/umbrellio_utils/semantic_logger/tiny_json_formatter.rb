@@ -93,7 +93,7 @@ module UmbrellioUtils
           msg << "\n#{e.backtrace.join("\n")}" if e.backtrace
           msg
         else
-          log.message
+          log.message.to_s
         end
       end
 
