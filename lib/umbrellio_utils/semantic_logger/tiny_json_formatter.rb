@@ -37,7 +37,7 @@ module UmbrellioUtils
       #   ) #=> <UmbrellioUtils::SemanticLogger::TinyJsonFormatter:0x000>
       # @return [UmbrellioUtils::SemanticLogger::TinyJsonFormatter]
       #   a new instance of the {UmbrellioUtils::SemanticLogger::TinyJsonFormatter}
-      def initialize(message_size_limit: 100_000, custom_names_mapping: {})
+      def initialize(message_size_limit: 10_000, custom_names_mapping: {})
         self.message_size_limit = message_size_limit
         self.field_names = { **DEFAULT_NAMES_MAPPING, **custom_names_mapping }.freeze
       end
