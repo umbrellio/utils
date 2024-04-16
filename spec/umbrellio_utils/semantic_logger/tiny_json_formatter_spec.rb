@@ -24,7 +24,8 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
   end
   let(:result) { formatter.call(log, nil) }
 
-  let(:formatter) { described_class.new(custom_names_mapping:) }
+  let(:formatter) { described_class.new(**options) }
+  let(:options) { Hash[custom_names_mapping:] }
   let(:custom_names_mapping) { Hash[] }
 
   let(:log_level) { :debug }
@@ -46,6 +47,22 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
       tags: [],
       named_tags: {},
     )
+  end
+
+  context "with custom message_size_limit" do
+    let(:options) { Hash[message_size_limit: 8] }
+
+    it "truncates message" do
+      expect(result).to be_json_as(
+        severity: "DEBUG",
+        name: "SomeName",
+        thread_fingerprint: "85bb6139",
+        message: "Some ...",
+        time: "2007-01-01T00:00:00.000000000Z",
+        tags: [],
+        named_tags: {},
+      )
+    end
   end
 
   context "with custom field names" do

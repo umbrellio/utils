@@ -21,7 +21,8 @@ module UmbrellioUtils
       }.freeze
 
       # Returns a new instance of the {UmbrellioUtils::SemanticLogger::TinyJsonFormatter}.
-      # @param [Hash] custom_names_mapping mapping from default field names to custom ones.
+      # @option [Integer] message_size_limit maximum number of characters in a log message
+      # @option [Hash] custom_names_mapping mapping from default field names to custom ones.
       # @option custom_names_mapping [Symbol] :severity custom name for the `severity` field.
       # @option custom_names_mapping [Symbol] :name custom name for the `name` field.
       # @option custom_names_mapping [Symbol] :thread_fingerprint
@@ -37,6 +38,7 @@ module UmbrellioUtils
       # @return [UmbrellioUtils::SemanticLogger::TinyJsonFormatter]
       #   a new instance of the {UmbrellioUtils::SemanticLogger::TinyJsonFormatter}
       def initialize(message_size_limit: 100_000, custom_names_mapping: {})
+        self.message_size_limit = message_size_limit
         self.field_names = { **DEFAULT_NAMES_MAPPING, **custom_names_mapping }.freeze
       end
 
@@ -53,7 +55,7 @@ module UmbrellioUtils
 
       # @!attribute field_names
       #   @return [Hash<Symbol, Symbol>] the mapping from default field names to the new ones.
-      attr_accessor :field_names
+      attr_accessor :message_size_limit, :field_names
 
       # Builds hash with data from log.
       # @return [Hash] the hash, which will be converted to the JSON later.
@@ -70,7 +72,7 @@ module UmbrellioUtils
           log.level.upcase,
           log.name,
           thread_fingerprint_for(log),
-          log_to_message(log),
+          truncate(log_to_message(log)),
           log.tags,
           log.named_tags,
           log.time.utc.iso8601(9),
@@ -93,6 +95,15 @@ module UmbrellioUtils
         else
           log.message
         end
+      end
+
+      def truncate(msg)
+        return msg unless msg.size > message_size_limit
+
+        suffix = "..."
+        msg = msg[0, message_size_limit - suffix.size]
+
+        "#{msg}#{suffix}"
       end
     end
   end
