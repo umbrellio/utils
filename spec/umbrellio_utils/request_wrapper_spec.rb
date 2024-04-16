@@ -136,9 +136,9 @@ describe UmbrellioUtils::RequestWrapper do
       {
         "CONTENT_LENGTH" => "0",
         "CONTENT_TYPE" => "application/json",
-        "HTTPS" => "off",
         "HTTP_HOST" => "test.host",
         "HTTP_USER_AGENT" => "Rails Testing",
+        "HTTPS" => "off",
         "PATH_INFO" => "/",
         "QUERY_STRING" => "",
         "REMOTE_ADDR" => "192.168.0.1",
@@ -146,6 +146,7 @@ describe UmbrellioUtils::RequestWrapper do
         "SCRIPT_NAME" => "",
         "SERVER_NAME" => "example.org",
         "SERVER_PORT" => "80",
+        "SERVER_PROTOCOL" => "HTTP/1.1",
       }
     end
 
@@ -170,16 +171,14 @@ describe UmbrellioUtils::RequestWrapper do
   describe "#headers" do
     let(:expected_headers) do
       {
-        "rack.multithread" => true,
-        "rack.multiprocess" => true,
-        "rack.run_once" => false,
+        "HTTPS" => "off",
+        "PATH_INFO" => "/",
+        "QUERY_STRING" => "",
+        "rack.url_scheme" => "http",
         "REQUEST_METHOD" => "GET",
         "SERVER_NAME" => "example.org",
         "SERVER_PORT" => "80",
-        "QUERY_STRING" => "",
-        "PATH_INFO" => "/",
-        "rack.url_scheme" => "http",
-        "HTTPS" => "off",
+        "SERVER_PROTOCOL" => "HTTP/1.1",
       }
     end
 

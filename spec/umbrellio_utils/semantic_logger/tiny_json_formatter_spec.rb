@@ -24,7 +24,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
   end
   let(:result) { formatter.call(log, nil) }
 
-  let(:formatter) { described_class.new(**custom_names_mapping) }
+  let(:formatter) { described_class.new(custom_names_mapping:) }
   let(:custom_names_mapping) { Hash[] }
 
   let(:log_level) { :debug }
