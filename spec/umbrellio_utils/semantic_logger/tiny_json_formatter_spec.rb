@@ -18,7 +18,6 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
     instance_double(SemanticLogger::Log).tap do |instance|
       allow(instance).to receive(:level).and_return(log_level)
       allow(instance).to receive(:name).and_return(log_name)
-      allow(instance).to receive(:thread_name).and_return(log_thread_name)
       allow(instance).to receive(:message).and_return(log_message)
       allow(instance).to receive(:exception).and_return(log_exception)
       allow(instance).to receive(:tags).and_return(log_tags)
@@ -34,15 +33,14 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
 
   let(:log_level) { :debug }
   let(:log_name) { "SomeName" }
-  let(:log_thread_name) { "10706" }
   let(:log_message) { "Some Message" }
   let(:log_exception) { nil }
   let(:log_tags) { [] }
   let(:log_named_tags) { Hash[] }
   let(:log_time) { Time.utc(2007) }
 
-  # "md5(11112222) = 821f3157e1a3456bfe1a000a1adf0862"
-  let(:expected_thread_fingerprint) { "821f3157" }
+  # md5(1111-2222) = b78cbe5f798598ea7f1ab6dc4158499d
+  let(:expected_thread_fingerprint) { "b78cbe5f" }
 
   it "properly formats log" do
     expect(result).to be_json_as(
