@@ -82,7 +82,7 @@ module UmbrellioUtils
       # Calculates MD5 fingerprint for the thread in which the log was made.
       # @return [String] truncated `MD5` hash.
       def thread_fingerprint_for(log)
-        Digest::MD5.hexdigest("#{log.thread_name}#{Process.pid}")[0...8]
+        Digest::MD5.hexdigest("#{Thread.current.object_id}#{Process.pid}")[0...8]
       end
 
       # Renders either exception or message of the log.

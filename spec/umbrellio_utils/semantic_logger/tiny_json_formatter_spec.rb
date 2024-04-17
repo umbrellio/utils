@@ -2,13 +2,17 @@
 
 describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
   before { stub_const("UmbrellioUtils::SemanticLogger::TinyJsonFormatter::Process", process_stub) }
+  before { stub_const("UmbrellioUtils::SemanticLogger::TinyJsonFormatter::Thread", thread_stub) }
 
   let(:process_stub) do
     class_double(Process).tap do |klass|
-      allow(klass).to receive(:pid).and_return(process_pid)
+      allow(klass).to receive(:pid).and_return(2222)
     end
   end
-  let(:process_pid) { 1234 }
+
+  let(:thread_stub) do
+    double(current: instance_double(Thread, object_id: 1111))
+  end
 
   let(:log) do
     instance_double(SemanticLogger::Log).tap do |instance|
@@ -37,11 +41,14 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
   let(:log_named_tags) { Hash[] }
   let(:log_time) { Time.utc(2007) }
 
+  # "md5(11112222) = 821f3157e1a3456bfe1a000a1adf0862"
+  let(:expected_thread_fingerprint) { "821f3157" }
+
   it "properly formats log" do
     expect(result).to be_json_as(
       severity: "DEBUG",
       name: "SomeName",
-      thread_fingerprint: "85bb6139",
+      thread_fingerprint: expected_thread_fingerprint,
       message: "Some Message",
       time: "2007-01-01T00:00:00.000000000Z",
       tags: [],
@@ -72,7 +79,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
       expect(result).to be_json_as(
         severity: "DEBUG",
         name: "SomeName",
-        thread_fingerprint: "85bb6139",
+        thread_fingerprint: expected_thread_fingerprint,
         note: "Some Message",
         timestamp: "2007-01-01T00:00:00.000000000Z",
         tags: [],
@@ -88,7 +95,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
       expect(result).to be_json_as(
         severity: "DEBUG",
         name: "SomeName",
-        thread_fingerprint: "85bb6139",
+        thread_fingerprint: expected_thread_fingerprint,
         message: "Some Message",
         time: "2007-01-01T00:00:00.000000000Z",
         tags: [],
@@ -105,7 +112,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
       expect(result).to be_json_as(
         severity: "DEBUG",
         name: "SomeName",
-        thread_fingerprint: "85bb6139",
+        thread_fingerprint: expected_thread_fingerprint,
         message: "Some Message",
         time: "2007-01-01T00:00:00.000000000Z",
         tags: ["kek"],
@@ -121,7 +128,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
       expect(result).to be_json_as(
         severity: "DEBUG",
         name: "SomeName",
-        thread_fingerprint: "85bb6139",
+        thread_fingerprint: expected_thread_fingerprint,
         message: "Error! (RuntimeError)",
         time: "2007-01-01T00:00:00.000000000Z",
         tags: [],
@@ -136,7 +143,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
         expect(result).to be_json_as(
           severity: "DEBUG",
           name: "SomeName",
-          thread_fingerprint: "85bb6139",
+          thread_fingerprint: expected_thread_fingerprint,
           message: "Error! (RuntimeError)\n1\n2\n3",
           time: "2007-01-01T00:00:00.000000000Z",
           tags: [],
