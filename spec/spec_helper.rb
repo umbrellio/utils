@@ -34,7 +34,7 @@ require "rabbit/test_helpers"
 
 require "umbrellio-utils"
 
-Dir[Pathname(__dir__).join("support/**/*")].sort.each { |x| require(x) }
+Dir[Pathname(__dir__).join("support/**/*")].each { |x| require(x) }
 
 TableSync.orm = :sequel
 TableSync.headers_callable = -> (_klass, attributes) { attributes.slice(:id) }

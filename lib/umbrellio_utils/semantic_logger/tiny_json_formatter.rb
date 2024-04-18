@@ -21,7 +21,8 @@ module UmbrellioUtils
       }.freeze
 
       # Returns a new instance of the {UmbrellioUtils::SemanticLogger::TinyJsonFormatter}.
-      # @param [Hash] custom_names_mapping mapping from default field names to custom ones.
+      # @option [Integer] message_size_limit maximum number of characters in a log message
+      # @option [Hash] custom_names_mapping mapping from default field names to custom ones.
       # @option custom_names_mapping [Symbol] :severity custom name for the `severity` field.
       # @option custom_names_mapping [Symbol] :name custom name for the `name` field.
       # @option custom_names_mapping [Symbol] :thread_fingerprint
@@ -36,7 +37,8 @@ module UmbrellioUtils
       #   ) #=> <UmbrellioUtils::SemanticLogger::TinyJsonFormatter:0x000>
       # @return [UmbrellioUtils::SemanticLogger::TinyJsonFormatter]
       #   a new instance of the {UmbrellioUtils::SemanticLogger::TinyJsonFormatter}
-      def initialize(**custom_names_mapping)
+      def initialize(message_size_limit: 10_000, custom_names_mapping: {})
+        self.message_size_limit = message_size_limit
         self.field_names = { **DEFAULT_NAMES_MAPPING, **custom_names_mapping }.freeze
       end
 
@@ -53,7 +55,7 @@ module UmbrellioUtils
 
       # @!attribute field_names
       #   @return [Hash<Symbol, Symbol>] the mapping from default field names to the new ones.
-      attr_accessor :field_names
+      attr_accessor :message_size_limit, :field_names
 
       # Builds hash with data from log.
       # @return [Hash] the hash, which will be converted to the JSON later.
@@ -69,8 +71,8 @@ module UmbrellioUtils
         [
           log.level.upcase,
           log.name,
-          thread_fingerprint_for(log),
-          log_to_message(log),
+          thread_fingerprint,
+          truncate(log_to_message(log)),
           log.tags,
           log.named_tags,
           log.time.utc.iso8601(9),
@@ -79,8 +81,8 @@ module UmbrellioUtils
 
       # Calculates MD5 fingerprint for the thread in which the log was made.
       # @return [String] truncated `MD5` hash.
-      def thread_fingerprint_for(log)
-        Digest::MD5.hexdigest("#{log.thread_name}#{Process.pid}")[0...8]
+      def thread_fingerprint
+        Digest::MD5.hexdigest("#{Thread.current.object_id}-#{Process.pid}")[0...8]
       end
 
       # Renders either exception or message of the log.
@@ -91,8 +93,17 @@ module UmbrellioUtils
           msg << "\n#{e.backtrace.join("\n")}" if e.backtrace
           msg
         else
-          log.message
+          log.message.to_s
         end
+      end
+
+      def truncate(msg)
+        return msg unless msg.size > message_size_limit
+
+        suffix = "..."
+        msg = msg[0, message_size_limit - suffix.size]
+
+        "#{msg}#{suffix}"
       end
     end
   end
