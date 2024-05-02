@@ -14,6 +14,7 @@ module UmbrellioUtils
     end
 
     memoize def body
+      request.body.rewind
       request.body.read.dup.force_encoding("utf-8")
     end
 
