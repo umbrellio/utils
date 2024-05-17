@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ModuleLength
 module UmbrellioUtils
   module Database
     extend self
@@ -44,14 +45,7 @@ module UmbrellioUtils
 
       loop do
         DB.transaction do
-          pk_column = primary_key.is_a?(Array) ? :temp_table_id : primary_key
-          pk_expr = DB[temp_table_name].select(pk_column).reverse(pk_column).limit(page_size)
-          deleted_items = DB[temp_table_name].where(pk_column => pk_expr).returning.delete
-          pk_set = deleted_items.map do |item|
-            next complex_key_expr(primary_key, item) if primary_key.is_a?(Array)
-            item[primary_key]
-          end
-
+          pk_set = pop_pk_batch(primary_key, temp_table_name, page_size)
           yield(pk_set) if pk_set.any?
         end
 
@@ -75,9 +69,9 @@ module UmbrellioUtils
 
       DB.drop_table?(temp_table_name)
       if primary_key.is_a?(Array)
-        create_complex_key_temp_table(temp_table_name, dataset, primary_key:)
+        create_complex_key_temp_table(temp_table_name, dataset, primary_key)
       else
-        create_simple_key_temp_table(temp_table_name, dataset, primary_key:)
+        create_simple_key_temp_table(temp_table_name, dataset, primary_key)
       end
 
       temp_table_name
@@ -85,7 +79,7 @@ module UmbrellioUtils
 
     private
 
-    def create_simple_key_temp_table(temp_table_name, dataset, primary_key:)
+    def create_simple_key_temp_table(temp_table_name, dataset, primary_key)
       model = dataset.model
       type = model.db_schema[primary_key][:db_type]
 
@@ -97,7 +91,7 @@ module UmbrellioUtils
       DB[temp_table_name].disable_insert_returning.insert(insert_ds)
     end
 
-    def create_complex_key_temp_table(temp_table_name, dataset, primary_key:)
+    def create_complex_key_temp_table(temp_table_name, dataset, primary_key)
       model = dataset.model
 
       DB.create_table(temp_table_name, unlogged: true) do
@@ -113,6 +107,16 @@ module UmbrellioUtils
         Sequel.function(:row_number).over, *primary_key.map { |f| Sequel[model.table_name][f] }
       )
       DB[temp_table_name].disable_insert_returning.insert(insert_ds)
+    end
+
+    def pop_pk_batch(primary_key, temp_table_name, batch_size)
+      pk_column = primary_key.is_a?(Array) ? :temp_table_id : primary_key
+      pk_expr = DB[temp_table_name].select(pk_column).reverse(pk_column).limit(batch_size)
+      deleted_items = DB[temp_table_name].where(pk_column => pk_expr).returning.delete
+      deleted_items.map do |item|
+        next complex_key_expr(primary_key, item) if primary_key.is_a?(Array)
+        item[primary_key]
+      end
     end
 
     def primary_key_from(**options)
@@ -135,3 +139,4 @@ module UmbrellioUtils
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
