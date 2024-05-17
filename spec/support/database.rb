@@ -23,7 +23,21 @@ DB.create_table :users do
   column :email, :text
 end
 
+DB.drop_table? :complex_users
+DB.create_table :complex_users do
+  column :geo, :text
+  column :nick, :text
+
+  primary_key %i[geo nick]
+end
+
 class User < Sequel::Model(:users)
+  def skip_table_sync?
+    false
+  end
+end
+
+class ComplexUser < Sequel::Model(:complex_users)
   def skip_table_sync?
     false
   end

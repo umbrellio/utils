@@ -56,6 +56,31 @@ describe UmbrellioUtils::Database, db: true do
       expect(sleep_calls).to eq([])
     end
 
+    context "with complex primary key" do
+      before { ComplexUser.multi_insert(complex_users_data) }
+
+      let(:complex_users_data) do
+        Array.new(10) { |index| Hash[geo: "Europe #{index + 1}", nick: "user#{index + 1}"] }
+      end
+
+      let(:nicks) { complex_users_data.pluck(:nick) }
+
+      subject(:result_nicks) do
+        users = []
+
+        described_class.each_record(ComplexUser.dataset, primary_key: %i[geo nick]) do |user|
+          users << user
+        end
+
+        users.map(&:nick)
+      end
+
+      it "yields all records" do
+        expect(result_nicks).to match_array(nicks)
+        expect(sleep_calls).to eq([])
+      end
+    end
+
     context "smaller page_size and numeric sleep value" do
       let(:options) { Hash[page_size: 3, sleep: 10] }
 

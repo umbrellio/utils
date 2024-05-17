@@ -25,7 +25,12 @@ module UmbrellioUtils
       primary_key = primary_key_from(**options)
 
       with_temp_table(dataset, **options) do |ids|
-        dataset.model.where(primary_key => ids).reverse(primary_key).each(&block)
+        if primary_key.is_a?(Array)
+          where_expr = Sequel.|(*ids.map { |id| complex_key_expr(primary_key, id) })
+          dataset.model.where(where_expr).each(&block)
+        else
+          dataset.model.where(primary_key => ids).reverse(primary_key).each(&block)
+        end
       end
     end
 
@@ -39,10 +44,13 @@ module UmbrellioUtils
 
       loop do
         DB.transaction do
-          pk_expr = DB[temp_table_name].select(primary_key).reverse(primary_key).limit(page_size)
-
-          deleted_items = DB[temp_table_name].where(primary_key => pk_expr).returning.delete
-          pk_set = deleted_items.map { |item| item[primary_key] }
+          pk_column = primary_key.is_a?(Array) ? :temp_table_id : primary_key
+          pk_expr = DB[temp_table_name].select(pk_column).reverse(pk_column).limit(page_size)
+          deleted_items = DB[temp_table_name].where(pk_column => pk_expr).returning.delete
+          pk_set = deleted_items.map do |item|
+            next complex_key_expr(primary_key, item) if primary_key.is_a?(Array)
+            item[primary_key]
+          end
 
           yield(pk_set) if pk_set.any?
         end
@@ -62,23 +70,50 @@ module UmbrellioUtils
     end
 
     def create_temp_table(dataset, primary_key:)
-      model = dataset.model
       time = Time.current
-      temp_table_name = "temp_#{model.table_name}_#{time.to_i}_#{time.nsec}".to_sym
-      type = model.db_schema[primary_key][:db_type]
+      temp_table_name = "temp_#{dataset.model.table_name}_#{time.to_i}_#{time.nsec}".to_sym
 
       DB.drop_table?(temp_table_name)
+      if primary_key.is_a?(Array)
+        create_complex_key_temp_table(temp_table_name, dataset, primary_key:)
+      else
+        create_simple_key_temp_table(temp_table_name, dataset, primary_key:)
+      end
+
+      temp_table_name
+    end
+
+    private
+
+    def create_simple_key_temp_table(temp_table_name, dataset, primary_key:)
+      model = dataset.model
+      type = model.db_schema[primary_key][:db_type]
+
       DB.create_table(temp_table_name, unlogged: true) do
         column primary_key, type, primary_key: true
       end
 
       insert_ds = dataset.select(Sequel[model.table_name][primary_key])
       DB[temp_table_name].disable_insert_returning.insert(insert_ds)
-
-      temp_table_name
     end
 
-    private
+    def create_complex_key_temp_table(temp_table_name, dataset, primary_key:)
+      model = dataset.model
+
+      DB.create_table(temp_table_name, unlogged: true) do
+        primary_key(:temp_table_id)
+
+        primary_key.each do |field|
+          type = model.db_schema[field][:db_type]
+          column field, type
+        end
+      end
+
+      insert_ds = dataset.select(
+        Sequel.function(:row_number).over, *primary_key.map { |f| Sequel[model.table_name][f] }
+      )
+      DB[temp_table_name].disable_insert_returning.insert(insert_ds)
+    end
 
     def primary_key_from(**options)
       options.fetch(:primary_key, :id)
@@ -93,6 +128,10 @@ module UmbrellioUtils
       else
         defined?(Rails) && Rails.env.production? ? 1 : 0
       end
+    end
+
+    def complex_key_expr(primary_key, record)
+      primary_key.to_h { |field| [field, record[field]] }
     end
   end
 end
