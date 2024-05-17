@@ -25,7 +25,8 @@ module UmbrellioUtils
       primary_key = primary_key_from(**options)
 
       with_temp_table(dataset, **options) do |ids|
-        dataset.model.where(primary_key => ids).reverse(primary_key).each(&block)
+        rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
+        dataset.model.where(row(primary_key) => rows).reverse(row(primary_key)).each(&block)
       end
     end
 
@@ -39,11 +40,7 @@ module UmbrellioUtils
 
       loop do
         DB.transaction do
-          pk_expr = DB[temp_table_name].select(primary_key).reverse(primary_key).limit(page_size)
-
-          deleted_items = DB[temp_table_name].where(primary_key => pk_expr).returning.delete
-          pk_set = deleted_items.map { |item| item[primary_key] }
-
+          pk_set = pop_next_pk_batch(temp_table_name, primary_key, page_size)
           yield(pk_set) if pk_set.any?
         end
 
@@ -61,18 +58,22 @@ module UmbrellioUtils
       Lamian.logger.send(:logdevs).each { |x| x.truncate(0) && x.rewind }
     end
 
-    def create_temp_table(dataset, primary_key:)
-      model = dataset.model
+    def create_temp_table(dataset, **options)
       time = Time.current
+      model = dataset.model
       temp_table_name = "temp_#{model.table_name}_#{time.to_i}_#{time.nsec}".to_sym
-      type = model.db_schema[primary_key][:db_type]
+      primary_key = primary_key_from(**options)
 
-      DB.drop_table?(temp_table_name)
       DB.create_table(temp_table_name, unlogged: true) do
-        column primary_key, type, primary_key: true
+        primary_key.each do |field|
+          type = model.db_schema[field][:db_type]
+          column field, type
+        end
+
+        primary_key primary_key
       end
 
-      insert_ds = dataset.select(Sequel[model.table_name][primary_key])
+      insert_ds = dataset.select(*qualified_pk(model.table_name, primary_key))
       DB[temp_table_name].disable_insert_returning.insert(insert_ds)
 
       temp_table_name
@@ -80,8 +81,16 @@ module UmbrellioUtils
 
     private
 
+    def row(values)
+      Sequel.function(:row, *values)
+    end
+
     def primary_key_from(**options)
-      options.fetch(:primary_key, :id)
+      Array(options.fetch(:primary_key, :id))
+    end
+
+    def qualified_pk(table_name, primary_key)
+      primary_key.map { |f| Sequel[table_name][f] }
     end
 
     def sleep_interval_from(sleep)
@@ -92,6 +101,16 @@ module UmbrellioUtils
         0
       else
         defined?(Rails) && Rails.env.production? ? 1 : 0
+      end
+    end
+
+    def pop_next_pk_batch(temp_table_name, primary_key, batch_size)
+      row = row(primary_key)
+      pk_expr = DB[temp_table_name].select(*primary_key).reverse(row).limit(batch_size)
+      deleted_items = DB[temp_table_name].where(row => pk_expr).returning.delete
+      deleted_items.map do |item|
+        next item if primary_key.size > 1
+        item[primary_key.first]
       end
     end
   end
