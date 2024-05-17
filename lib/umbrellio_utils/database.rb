@@ -25,12 +25,8 @@ module UmbrellioUtils
       primary_key = primary_key_from(**options)
 
       with_temp_table(dataset, **options) do |ids|
-        if primary_key.size > 1
-          where_expr = Sequel.|(*ids.map { |id| row(primary_key) =~ row(id.values) })
-          dataset.model.where(where_expr).reverse(row(primary_key)).each(&block)
-        else
-          dataset.model.where(primary_key => ids).reverse(primary_key).each(&block)
-        end
+        rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
+        dataset.model.where(row(primary_key) => rows).reverse(row(primary_key)).each(&block)
       end
     end
 
