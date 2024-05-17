@@ -63,7 +63,7 @@ describe UmbrellioUtils::Database, db: true do
         Array.new(10) { |index| Hash[geo: "Europe #{index + 1}", nick: "user#{index + 1}"] }
       end
 
-      let(:reversed_nicks) { complex_users_data.pluck(:nick).reverse }
+      let(:nicks) { complex_users_data.pluck(:nick) }
 
       subject(:result_nicks) do
         users = []
@@ -76,7 +76,7 @@ describe UmbrellioUtils::Database, db: true do
       end
 
       it "yields all records" do
-        expect(result_nicks).to match_array(reversed_nicks)
+        expect(result_nicks).to match_array(nicks)
         expect(sleep_calls).to eq([])
       end
     end

@@ -26,7 +26,7 @@ module UmbrellioUtils
 
       with_temp_table(dataset, **options) do |ids|
         if primary_key.size > 1
-          where_expr = Sequel.|(*ids.map { |id| complex_key_expr(primary_key, id) })
+          where_expr = Sequel.|(*ids.map { |id| row(primary_key) =~ row(id.values) })
           dataset.model.where(where_expr).reverse(row(primary_key)).each(&block)
         else
           dataset.model.where(primary_key => ids).reverse(primary_key).each(&block)
@@ -85,8 +85,8 @@ module UmbrellioUtils
 
     private
 
-    def row(primary_key)
-      Sequel.function(:row, *primary_key)
+    def row(values)
+      Sequel.function(:row, *values)
     end
 
     def primary_key_from(**options)
@@ -106,10 +106,6 @@ module UmbrellioUtils
       else
         defined?(Rails) && Rails.env.production? ? 1 : 0
       end
-    end
-
-    def complex_key_expr(primary_key, record)
-      primary_key.to_h { |field| [field, record[field]] }
     end
 
     def pop_next_pk_batch(temp_table_name, primary_key, batch_size)
