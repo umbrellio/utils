@@ -65,10 +65,12 @@ describe UmbrellioUtils::Database, db: true do
 
       let(:nicks) { complex_users_data.pluck(:nick) }
 
+      let(:primary_key_param) { %i[geo nick] }
+
       subject(:result_nicks) do
         users = []
 
-        described_class.each_record(ComplexUser.dataset, primary_key: %i[geo nick]) do |user|
+        described_class.each_record(ComplexUser.dataset, primary_key: primary_key_param) do |user|
           users << user
         end
 
@@ -78,6 +80,23 @@ describe UmbrellioUtils::Database, db: true do
       it "yields all records" do
         expect(result_nicks).to match_array(nicks)
         expect(sleep_calls).to eq([])
+      end
+
+      context "without primary key param" do
+        let(:primary_key_param) { nil }
+
+        it "yields all records" do
+          expect(result_nicks).to match_array(nicks)
+          expect(sleep_calls).to eq([])
+        end
+      end
+
+      context "with invalid primary key param" do
+        let(:primary_key_param) { [] }
+
+        it "raises InvalidPkError" do
+          expect { result_nicks }.to raise_error(UmbrellioUtils::Database::InvalidPkError)
+        end
       end
     end
 

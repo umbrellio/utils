@@ -5,6 +5,7 @@ module UmbrellioUtils
     extend self
 
     HandledConstaintError = Class.new(StandardError)
+    InvalidPkError = Class.new(StandardError)
 
     def handle_constraint_error(constraint_name, &block)
       DB.transaction(savepoint: true, &block)
@@ -22,7 +23,7 @@ module UmbrellioUtils
     end
 
     def each_record(dataset, **options, &block)
-      primary_key = primary_key_from(**options)
+      primary_key = primary_key_from(dataset, **options)
 
       with_temp_table(dataset, **options) do |ids|
         rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
@@ -31,7 +32,7 @@ module UmbrellioUtils
     end
 
     def with_temp_table(dataset, page_size: 1_000, sleep: nil, **options)
-      primary_key = primary_key_from(**options)
+      primary_key = primary_key_from(dataset, **options)
       sleep_interval = sleep_interval_from(sleep)
 
       temp_table_name = create_temp_table(dataset, primary_key: primary_key)
@@ -62,7 +63,7 @@ module UmbrellioUtils
       time = Time.current
       model = dataset.model
       temp_table_name = "temp_#{model.table_name}_#{time.to_i}_#{time.nsec}".to_sym
-      primary_key = primary_key_from(**options)
+      primary_key = primary_key_from(dataset, **options)
 
       DB.create_table(temp_table_name, unlogged: true) do
         primary_key.each do |field|
@@ -85,8 +86,14 @@ module UmbrellioUtils
       Sequel.function(:row, *values)
     end
 
-    def primary_key_from(**options)
-      Array(options.fetch(:primary_key, :id))
+    def extract_primary_key(dataset)
+      dataset.db.schema(dataset.first_source).select { |x| x[1][:primary_key] }.map(&:first)
+    end
+
+    def primary_key_from(dataset, **options)
+      Array(options[:primary_key] || extract_primary_key(dataset)).tap do |primary_key|
+        raise InvalidPkError if primary_key.empty?
+      end
     end
 
     def qualified_pk(table_name, primary_key)
