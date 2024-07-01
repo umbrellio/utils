@@ -42,7 +42,7 @@ describe UmbrellioUtils do
       around do |example|
         old_const = UmbrellioUtils::Constants.dup
         example.call
-        UmbrellioUtils.send(:remove_const, :Constants)
+        UmbrellioUtils.send(:remove_const, :Constants) # rubocop:disable RSpec/RemoveConst
         UmbrellioUtils.const_set(:Constants, old_const)
       end
 

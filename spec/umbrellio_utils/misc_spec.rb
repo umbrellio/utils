@@ -4,7 +4,7 @@ describe UmbrellioUtils::Misc do
   describe "::build_infinite_hash" do
     subject(:hash) { described_class.build_infinite_hash }
 
-    specify { is_expected.to be_an_instance_of(Hash) }
+    it { is_expected.to be_an_instance_of(Hash) }
 
     context "with deep accessing" do
       it "generates new hashes" do

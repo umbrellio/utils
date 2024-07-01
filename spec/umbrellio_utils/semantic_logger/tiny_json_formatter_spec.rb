@@ -16,13 +16,15 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
 
   let(:log) do
     instance_double(SemanticLogger::Log).tap do |instance|
-      allow(instance).to receive(:level).and_return(log_level)
-      allow(instance).to receive(:name).and_return(log_name)
-      allow(instance).to receive(:message).and_return(log_message)
-      allow(instance).to receive(:exception).and_return(log_exception)
-      allow(instance).to receive(:tags).and_return(log_tags)
-      allow(instance).to receive(:named_tags).and_return(log_named_tags)
-      allow(instance).to receive(:time).and_return(log_time)
+      allow(instance).to receive_messages(
+        level: log_level,
+        name: log_name,
+        message: log_message,
+        exception: log_exception,
+        tags: log_tags,
+        named_tags: log_named_tags,
+        time: log_time,
+      )
     end
   end
   let(:result) { formatter.call(log, nil) }
