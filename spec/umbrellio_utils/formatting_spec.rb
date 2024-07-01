@@ -17,7 +17,7 @@ describe UmbrellioUtils::Formatting do
       let(:hash) { Hash["deep,first": true, "deep,second": false, root: "kek"] }
       let(:kwargs) { Hash[delimiter: ","] }
 
-      specify { is_expected.to eq(deep: { first: true, second: false }, root: "kek") }
+      it { is_expected.to eq(deep: { first: true, second: false }, root: "kek") }
     end
 
     context "with custom key converter" do
@@ -38,7 +38,7 @@ describe UmbrellioUtils::Formatting do
     let(:hash) { Hash[app: { "very.deep": "value" }, key: "value"] }
     let(:kwargs) { Hash[] }
 
-    specify { is_expected.to eq(app: { very: { deep: "value" } }, key: "value") }
+    it { is_expected.to eq(app: { very: { deep: "value" } }, key: "value") }
 
     context "with custom key converter" do
       let(:kwargs) { Hash[key_converter: :to_s] }

@@ -5,7 +5,7 @@ module UmbrellioUtils
     extend self
 
     def secret_engine_present?(engine_path)
-      ::Vault.logical.read("sys/mounts").data.key?("#{engine_path}/".to_sym)
+      ::Vault.logical.read("sys/mounts").data.key?(:"#{engine_path}/")
     end
 
     def create_kv_engine(path)
