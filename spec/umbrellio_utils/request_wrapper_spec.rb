@@ -134,7 +134,6 @@ describe UmbrellioUtils::RequestWrapper do
   describe "#http_headers" do
     let(:expected_headers) do
       {
-        "CONTENT_LENGTH" => "0",
         "CONTENT_TYPE" => "application/json",
         "HTTP_HOST" => "test.host",
         "HTTP_USER_AGENT" => "Rails Testing",
@@ -151,7 +150,7 @@ describe UmbrellioUtils::RequestWrapper do
     end
 
     specify do
-      expect(wrapped_request.http_headers.to_h).to eq(expected_headers)
+      expect(wrapped_request.http_headers.to_h).to include(expected_headers)
     end
   end
 

@@ -43,6 +43,7 @@ Rabbit.configure do |config|
   config.project_id = :umbrellio_utils
   config.group_id = :umbrellio_utils
   config.environment = :test
+  config.exception_notifier = proc {}
 end
 
 RSpec.configure do |config|
