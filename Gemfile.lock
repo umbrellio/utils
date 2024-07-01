@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    umbrellio-utils (1.2.1)
+    umbrellio-utils (1.3.0)
       memery (~> 1)
 
 GEM
@@ -163,6 +163,12 @@ GEM
     nio4r (2.7.1)
     nokogiri (1.15.6)
       mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    nokogiri (1.15.6-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.15.6-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.15.6-x86_64-linux)
       racc (~> 1.4)
     nori (2.7.0)
       bigdecimal
@@ -367,4 +373,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   2.5.9
+   2.5.14

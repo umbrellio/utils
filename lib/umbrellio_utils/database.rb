@@ -48,15 +48,9 @@ module UmbrellioUtils
         break if pk_set.empty?
 
         Kernel.sleep(sleep_interval) if sleep_interval.positive?
-        clear_lamian_logs!
       end
     ensure
       DB.drop_table(temp_table_name)
-    end
-
-    def clear_lamian_logs!
-      return unless defined?(Lamian)
-      Lamian.logger.send(:logdevs).each { |x| x.truncate(0) && x.rewind }
     end
 
     def create_temp_table(dataset, **options)
