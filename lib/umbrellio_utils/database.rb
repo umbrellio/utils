@@ -42,7 +42,7 @@ module UmbrellioUtils
       sleep_interval = sleep_interval_from(sleep)
 
       temp_table_name = create_temp_table(
-        dataset, primary_key: primary_key, table_name: temp_table_name
+        dataset, primary_key: primary_key, temp_table_name: temp_table_name&.to_sym
       )
 
       pk_set = []
@@ -61,28 +61,28 @@ module UmbrellioUtils
       DB.drop_table(temp_table_name)
     end
 
-    def create_temp_table(dataset, primary_key: nil, table_name: nil)
+    def create_temp_table(dataset, primary_key: nil, temp_table_name: nil)
       time = Time.current
       model = dataset.model
 
-      table_name ||= :"temp_#{model.table_name}_#{time.to_i}_#{time.nsec}"
-      return table_name.to_sym if DB.table_exists?(table_name)
+      temp_table_name ||= :"temp_#{model.table_name}_#{time.to_i}_#{time.nsec}"
+      return temp_table_name if DB.table_exists?(temp_table_name)
 
       primary_key = primary_key_from(dataset, primary_key: primary_key)
 
-      DB.create_table(table_name, unlogged: true) do
+      DB.create_table(temp_table_name, unlogged: true) do
         primary_key.each do |field|
           type = model.db_schema[field][:db_type]
-          column field, type
+          column(field, type)
         end
 
-        primary_key primary_key
+        primary_key(primary_key)
       end
 
       insert_ds = dataset.select(*qualified_pk(model.table_name, primary_key))
-      DB[table_name].disable_insert_returning.insert(insert_ds)
+      DB[temp_table_name].disable_insert_returning.insert(insert_ds)
 
-      table_name
+      temp_table_name
     end
 
     private
