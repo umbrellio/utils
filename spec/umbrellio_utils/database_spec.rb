@@ -126,5 +126,22 @@ describe UmbrellioUtils::Database, :db do
         end
       end
     end
+
+    context "custom temp table name provided" do
+      let(:options) { Hash[temp_table_name: "custom"] }
+
+      it "uses it" do
+        expect(DB).to receive(:create_table).with(:custom, unlogged: true).and_call_original
+        expect(result_emails).to eq(reversed_emails)
+      end
+    end
+
+    context "some invalid option provided" do
+      let(:options) { Hash[invalid: 1] }
+
+      it "raises error" do
+        expect { result_emails }.to raise_error(ArgumentError)
+      end
+    end
   end
 end
