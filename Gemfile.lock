@@ -1,7 +1,14 @@
+GIT
+  remote: https://github.com/ruby/net-pop.git
+  revision: e8d0afe2773b9eb6a23c39e9e437f6fc0fc7c733
+  specs:
+    net-pop (0.1.2)
+      net-protocol
+
 PATH
   remote: .
   specs:
-    umbrellio-utils (1.3.0)
+    umbrellio-utils (1.4.0)
       memery (~> 1)
 
 GEM
@@ -106,7 +113,7 @@ GEM
     docile (1.4.0)
     domain_name (0.6.20240107)
     drb (2.2.1)
-    dry-inflector (1.0.0)
+    dry-inflector (1.1.0)
     erubi (1.13.0)
     ffi (1.17.0)
     ffi (1.17.0-arm64-darwin)
@@ -158,7 +165,6 @@ GEM
     net-imap (0.4.14)
       date
       net-protocol
-    net-pop (0.1.2)
     net-protocol (0.2.2)
       timeout
     net-smtp (0.5.0)
@@ -193,7 +199,7 @@ GEM
       sneakers (~> 2.0)
       tainbox
     racc (1.8.0)
-    rack (3.1.4)
+    rack (3.1.6)
     rack-session (2.0.0)
       rack (>= 3.0.0)
     rack-test (2.1.0)
@@ -304,7 +310,7 @@ GEM
     self_data (1.3.0)
     semantic_logger (4.15.0)
       concurrent-ruby (~> 1.0)
-    sequel (5.81.0)
+    sequel (5.82.0)
       bigdecimal
     sequel-batches (2.0.2)
       sequel
@@ -367,6 +373,7 @@ DEPENDENCIES
   bundler
   ci-helper
   http
+  net-pop!
   nokogiri
   nori
   pg

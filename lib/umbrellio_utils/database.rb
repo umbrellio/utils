@@ -22,8 +22,8 @@ module UmbrellioUtils
       error.result.error_field(PG::Result::PG_DIAG_CONSTRAINT_NAME)
     end
 
-    def each_record(dataset, **options, &block)
-      primary_key = primary_key_from(dataset, **options)
+    def each_record(dataset, primary_key: nil, **options, &block)
+      primary_key = primary_key_from(dataset, primary_key: primary_key)
 
       with_temp_table(dataset, **options) do |ids|
         rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
@@ -31,11 +31,28 @@ module UmbrellioUtils
       end
     end
 
-    def with_temp_table(dataset, page_size: 1_000, sleep: nil, **options)
-      primary_key = primary_key_from(dataset, **options)
+    # Iterates over a dataset and yields batches of primary keys.
+    # First, a temporary table is created and populated with dataset primary keys.
+    # After that, a batch of rows is deleted from the temp table on each iteration
+    # and gets yielded to the caller.
+    # @option [Integer] page_size max size of each yielded PK batch
+    # @option [Integer] sleep interval to sleep between each iteration
+    # @option [Array] primary_key custom primary key to use for dataset
+    # @option [Symbol, String] temp_table_name custom name for temporary table,
+    #   table is reused if already exists
+    def with_temp_table(
+      dataset,
+      page_size: 1_000,
+      sleep: nil,
+      primary_key: nil,
+      temp_table_name: nil
+    )
+      primary_key = primary_key_from(dataset, primary_key: primary_key)
       sleep_interval = sleep_interval_from(sleep)
 
-      temp_table_name = create_temp_table(dataset, primary_key: primary_key)
+      temp_table_name = create_temp_table(
+        dataset, primary_key: primary_key, temp_table_name: temp_table_name&.to_sym
+      )
 
       pk_set = []
 
@@ -49,23 +66,26 @@ module UmbrellioUtils
 
         Kernel.sleep(sleep_interval) if sleep_interval.positive?
       end
-    ensure
+
       DB.drop_table(temp_table_name)
     end
 
-    def create_temp_table(dataset, **options)
+    def create_temp_table(dataset, primary_key: nil, temp_table_name: nil)
       time = Time.current
       model = dataset.model
-      temp_table_name = :"temp_#{model.table_name}_#{time.to_i}_#{time.nsec}"
-      primary_key = primary_key_from(dataset, **options)
+
+      temp_table_name ||= :"temp_#{model.table_name}_#{time.to_i}_#{time.nsec}"
+      return temp_table_name if DB.table_exists?(temp_table_name)
+
+      primary_key = primary_key_from(dataset, primary_key: primary_key)
 
       DB.create_table(temp_table_name, unlogged: true) do
         primary_key.each do |field|
           type = model.db_schema[field][:db_type]
-          column field, type
+          column(field, type)
         end
 
-        primary_key primary_key
+        primary_key(primary_key)
       end
 
       insert_ds = dataset.select(*qualified_pk(model.table_name, primary_key))
