@@ -31,6 +31,15 @@ module UmbrellioUtils
       end
     end
 
+    # Iterates over a dataset and yields batches of primary keys.
+    # First, a temporary table is created and populated with dataset primary keys.
+    # After that, a batch of rows is deleted from the temp table on each iteration
+    # and gets yielded to the caller.
+    # @option [Integer] page_size max size of each yielded PK batch
+    # @option [Integer] sleep interval to sleep between each iteration
+    # @option [Array] primary_key custom primary key to use for dataset
+    # @option [Symbol, String] temp_table_name custom name for temporary table,
+    #   table is reused if already exists
     def with_temp_table(
       dataset,
       page_size: 1_000,
