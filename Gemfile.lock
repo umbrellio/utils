@@ -241,6 +241,7 @@ GEM
     reline (0.5.9)
       io-console (~> 0.5)
     rexml (3.3.6)
+      strscan
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -331,6 +332,7 @@ GEM
       rbtree
       set (~> 1.0)
     stringio (3.1.1)
+    strscan (3.1.0)
     symbiont-ruby (0.7.0)
     table_sync (6.5.0)
       memery
