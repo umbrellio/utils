@@ -6,9 +6,7 @@ module UmbrellioUtils::Jobs
   Worker = Data.define(:name)
   Capsule = Data.define(:name, :worker, :weight)
   Queue = Data.define(:name, :capsule, :weight)
-
-  MIN_RETRY_INTERVAL = 10.seconds
-  MAX_RETRY_INTERVAL = 4.hours
+  Entry = Struct.new(:capsule, :queues, :concurrency)
 
   def workers
     @workers ||= []
@@ -36,13 +34,26 @@ module UmbrellioUtils::Jobs
     queues << Queue.new(name:, capsule:, weight:)
   end
 
-  def retry_interval(error_count)
-    interval = MIN_RETRY_INTERVAL * (1.3**(error_count - 3))
+  def retry_interval(error_count, min_interval:, max_interval:)
+    interval = min_interval * (1.3**(error_count - 3))
+    interval.clamp(min_interval, max_interval).round
+  end
 
-    interval
-      .then { |x| [x, MIN_RETRY_INTERVAL].max }
-      .then { |x| [x, MAX_RETRY_INTERVAL].min }
-      .round
+  def configure_capsules!(config, priority_level:, max_concurrency:)
+    default_capsule_configured = false
+
+    entries = capsules_for(priority_level, max_concurrency)
+
+    unless entries.find { |x| x.capsule == :default }
+      entries.first.capsule = :default
+    end
+
+    entries.each do |entry|
+      config.capsule(entry.capsule) do |capsule|
+        capsule.queues = entry.queues
+        capsule.concurrency = entry.concurrency
+      end
+    end
   end
 
   def capsules_for(worker, max_concurrency)
@@ -59,7 +70,7 @@ module UmbrellioUtils::Jobs
       concurrency = (max_concurrency * weight_coef).to_i
       concurrency = 1 unless concurrency > 1
       queues = self.queues.select { |x| x.capsule == capsule.name }.map { |x| [x.name, x.weight] }
-      [capsule.name, queues, concurrency]
+      Entry.new(capsule.name, queues, concurrency)
     end
 
     raise "No queues found for worker #{worker.inspect}" if result.empty?
