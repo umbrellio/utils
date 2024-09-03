@@ -41,8 +41,8 @@ module UmbrellioUtils
     }
   end
 
-  def synchronize(&block)
-    GLOBAL_MUTEX.owned? ? yield : GLOBAL_MUTEX.synchronize(&block)
+  def synchronize(&)
+    GLOBAL_MUTEX.owned? ? yield : GLOBAL_MUTEX.synchronize(&)
   end
 end
 

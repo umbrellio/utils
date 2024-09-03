@@ -8,7 +8,7 @@ RSpec.configure do |config|
         return super if @opts[:_skip_order_patch]
         order = @opts[:order].dup || []
         order << Sequel.function(:random)
-        clone(order: order, _skip_order_patch: true).select_sql
+        clone(order:, _skip_order_patch: true).select_sql
       end
     end
   end

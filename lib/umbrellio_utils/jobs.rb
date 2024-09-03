@@ -40,8 +40,6 @@ module UmbrellioUtils::Jobs
   end
 
   def configure_capsules!(config, priority_level:, max_concurrency:)
-    default_capsule_configured = false
-
     entries = capsules_for(priority_level, max_concurrency)
 
     unless entries.find { |x| x.capsule == :default }
@@ -59,7 +57,7 @@ module UmbrellioUtils::Jobs
   def capsules_for(worker, max_concurrency)
     capsules = self.capsules.select do |capsule|
       next unless capsule.worker.to_s == worker.underscore.to_s
-      next unless queues.select { |queue| queue.capsule == capsule.name }.any?
+      next unless queues.any? { |queue| queue.capsule == capsule.name }
       true
     end
 
