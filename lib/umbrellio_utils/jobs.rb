@@ -3,9 +3,9 @@
 module UmbrellioUtils::Jobs
   extend self
 
-  Worker = Data.define(:name)
-  Capsule = Data.define(:name, :worker, :weight)
-  Queue = Data.define(:name, :capsule, :weight)
+  Worker = Struct.new(:name)
+  Capsule = Struct.new(:name, :worker, :weight)
+  Queue = Struct.new(:name, :capsule, :weight)
   Entry = Struct.new(:capsule, :queues, :concurrency)
 
   def workers
@@ -21,17 +21,17 @@ module UmbrellioUtils::Jobs
   end
 
   def register_worker(name)
-    workers << Worker.new(name:)
+    workers << Worker.new(name)
   end
 
   def register_capsule(name, worker: :default, weight: 1)
     workers.find { |x| x.name == worker } or raise "Worker not found: #{worker.inspect}"
-    capsules << Capsule.new(name:, worker:, weight:)
+    capsules << Capsule.new(name, worker, weight)
   end
 
   def register_queue(name, capsule: :default, weight: 1)
     capsules.find { |x| x.name == capsule } or raise "Capsule not found: #{capsule.inspect}"
-    queues << Queue.new(name:, capsule:, weight:)
+    queues << Queue.new(name, capsule, weight)
   end
 
   def retry_interval(error_count, min_interval:, max_interval:)
