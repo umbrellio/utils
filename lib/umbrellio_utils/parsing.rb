@@ -75,9 +75,10 @@ module UmbrellioUtils
 
     private
 
-    def snakecase(string) # See https://github.com/savonrb/nori/blob/main/lib/nori/string_utils.rb
+    # See https://github.com/savonrb/nori/blob/main/lib/nori/string_utils.rb
+    def snakecase(string)
       str = string.dup
-      str.gsub!(/::/, '/')
+      str.gsub!("::", "/")
       str.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
       str.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
       str.tr!(".", "_")
