@@ -20,7 +20,7 @@ module UmbrellioUtils
       xml.remove_namespaces!
       xml.xpath("//@*").remove if remove_attributes
 
-      tags_converter = snakecase ? -> (tag) { tag.snakecase.to_sym } : -> (tag) { tag.to_sym }
+      tags_converter = snakecase ? -> (tag) { snakecase(tag).to_sym } : -> (tag) { tag.to_sym }
       nori = Nori.new(convert_tags_to: tags_converter, convert_dashes_to_underscores: false)
       nori.parse(xml.to_xml(save_with: Nokogiri::XML::Node::SaveOptions::NO_DECLARATION))
     end
@@ -71,6 +71,19 @@ module UmbrellioUtils
       return phone.e164 if e164_format
 
       phone.sanitized
+    end
+
+    private
+
+    def snakecase(string) # See https://github.com/savonrb/nori/blob/main/lib/nori/string_utils.rb
+      str = string.dup
+      str.gsub!(/::/, '/')
+      str.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+      str.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
+      str.tr!(".", "_")
+      str.tr!("-", "_")
+      str.downcase!
+      str
     end
   end
 end
