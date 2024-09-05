@@ -1,14 +1,7 @@
-GIT
-  remote: https://github.com/ruby/net-pop.git
-  revision: e8d0afe2773b9eb6a23c39e9e437f6fc0fc7c733
-  specs:
-    net-pop (0.1.2)
-      net-protocol
-
 PATH
   remote: .
   specs:
-    umbrellio-utils (1.4.0)
+    umbrellio-utils (1.5.0)
       memery (~> 1)
 
 GEM
@@ -114,7 +107,7 @@ GEM
     ffi (1.17.0)
     ffi (1.17.0-arm64-darwin)
     ffi (1.17.0-x86_64-darwin)
-    ffi (1.17.0-x86_64-linux)
+    ffi (1.17.0-x86_64-linux-gnu)
     ffi-compiler (1.3.2)
       ffi (>= 1.15.5)
       rake
@@ -158,8 +151,10 @@ GEM
     mini_mime (1.1.5)
     mini_portile2 (2.8.7)
     minitest (5.25.1)
-    net-imap (0.4.15)
+    net-imap (0.4.16)
       date
+      net-protocol
+    net-pop (0.1.2)
       net-protocol
     net-protocol (0.2.2)
       timeout
@@ -178,7 +173,7 @@ GEM
     nori (2.7.1)
       bigdecimal
     parallel (1.26.3)
-    parser (3.3.4.2)
+    parser (3.3.5.0)
       ast (~> 2.4.1)
       racc
     pg (1.5.7)
@@ -238,10 +233,9 @@ GEM
     rdoc (6.7.0)
       psych (>= 4.0.0)
     regexp_parser (2.9.2)
-    reline (0.5.9)
+    reline (0.5.10)
       io-console (~> 0.5)
-    rexml (3.3.6)
-      strscan
+    rexml (3.3.7)
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -269,7 +263,7 @@ GEM
       rubocop-ast (>= 1.31.1, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 3.0)
-    rubocop-ast (1.32.2)
+    rubocop-ast (1.32.3)
       parser (>= 3.3.1.0)
     rubocop-capybara (2.21.0)
       rubocop (~> 1.41)
@@ -332,8 +326,6 @@ GEM
       rbtree
       set (~> 1.0)
     stringio (3.1.1)
-    strscan (3.1.0)
-    symbiont-ruby (0.7.0)
     table_sync (6.5.0)
       memery
       rabbit_messaging (~> 0.13)
@@ -346,16 +338,15 @@ GEM
     timeout (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    umbrellio-sequel-plugins (0.15.0.198)
+    umbrellio-sequel-plugins (0.16.0.211)
       sequel
-      symbiont-ruby
     unicode-display_width (2.5.0)
     useragent (0.16.10)
     webrick (1.8.1)
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    yard (0.9.36)
+    yard (0.9.37)
     zeitwerk (2.6.18)
 
 PLATFORMS
@@ -371,7 +362,7 @@ DEPENDENCIES
   bundler
   ci-helper
   http
-  net-pop!
+  net-pop
   nokogiri
   nori
   pg
