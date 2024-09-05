@@ -74,8 +74,8 @@ describe UmbrellioUtils::Jobs do
     let(:capsule) { Struct.new(:queues, :concurrency) }
     let(:config) { double(:config) }
     let(:capsule_default) { capsule.new }
-    let(:capsule_cap1) { capsule.new }
-    let(:capsule_cap2) { capsule.new }
+    let(:capsule_cap1) { capsule.new } # rubocop:disable RSpec/IndexedLet
+    let(:capsule_cap2) { capsule.new } # rubocop:disable RSpec/IndexedLet
 
     specify do
       jobs.configure_capsules!(config, priority_level: "default", max_concurrency: 10)
