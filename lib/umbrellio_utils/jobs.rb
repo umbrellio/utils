@@ -43,7 +43,7 @@ module UmbrellioUtils::Jobs
     entries = capsules_for(priority_level, max_concurrency)
 
     unless entries.find { |x| x.capsule == :default }
-      entries.first.capsule = :default
+      entries.last.capsule = :default # Default capsule should always be present in sidekiq
     end
 
     entries.each do |entry|

@@ -64,6 +64,45 @@ describe UmbrellioUtils::Jobs do
     end
   end
 
+  describe ".configure_capsules!" do
+    before do
+      allow(config).to receive(:capsule).with(:default).and_yield(capsule_default)
+      allow(config).to receive(:capsule).with(:cap1).and_yield(capsule_cap1)
+      allow(config).to receive(:capsule).with(:cap2).and_yield(capsule_cap2)
+    end
+
+    let(:capsule) { Struct.new(:queues, :concurrency) }
+    let(:config) { double(:config) }
+    let(:capsule_default) { capsule.new }
+    let(:capsule_cap1) { capsule.new }
+    let(:capsule_cap2) { capsule.new }
+
+    specify do
+      jobs.configure_capsules!(config, priority_level: "default", max_concurrency: 10)
+
+      expect(capsule_default.queues).to eq([[:q3, 10], [:q4, 1]])
+      expect(capsule_default.concurrency).to eq(1)
+
+      expect(capsule_cap1.queues).to eq([[:q1, 1]])
+      expect(capsule_cap1.concurrency).to eq(3)
+
+      expect(capsule_cap2.queues).to eq([[:q2, 5]])
+      expect(capsule_cap2.concurrency).to eq(6)
+    end
+
+    context "non default level" do
+      specify do
+        jobs.configure_capsules!(config, priority_level: "w1", max_concurrency: 10)
+
+        expect(capsule_default.queues).to eq([[:q5, 1]])
+        expect(capsule_default.concurrency).to eq(10)
+
+        expect(capsule_cap1.queues).to eq(nil)
+        expect(capsule_cap2.queues).to eq(nil)
+      end
+    end
+  end
+
   describe ".validate_queue_name!" do
     specify do
       expect(jobs.validate_queue_name!(:q1)).to eq(nil)
