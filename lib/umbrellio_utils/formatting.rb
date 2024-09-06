@@ -58,7 +58,7 @@ module UmbrellioUtils
     end
 
     def to_date_part_string(part)
-      format("%<part>02d", part: part)
+      format("%<part>02d", part:)
     end
 
     #

@@ -2,7 +2,7 @@
 
 describe UmbrellioUtils::RequestWrapper do
   subject(:wrapped_request) do
-    described_class.new(request, remove_xml_attributes: remove_xml_attributes)
+    described_class.new(request, remove_xml_attributes:)
   end
 
   let(:request_body) { Hash[some: "value"].to_json }

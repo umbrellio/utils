@@ -41,8 +41,8 @@ module UmbrellioUtils
     }
   end
 
-  def synchronize(&block)
-    GLOBAL_MUTEX.owned? ? yield : GLOBAL_MUTEX.synchronize(&block)
+  def synchronize(&)
+    GLOBAL_MUTEX.owned? ? yield : GLOBAL_MUTEX.synchronize(&)
   end
 end
 
@@ -53,6 +53,7 @@ require_relative "umbrellio_utils/control"
 require_relative "umbrellio_utils/database"
 require_relative "umbrellio_utils/formatting"
 require_relative "umbrellio_utils/http_client"
+require_relative "umbrellio_utils/jobs"
 require_relative "umbrellio_utils/misc"
 require_relative "umbrellio_utils/parsing"
 require_relative "umbrellio_utils/passwords"

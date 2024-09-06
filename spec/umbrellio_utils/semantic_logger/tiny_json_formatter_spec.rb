@@ -30,7 +30,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
   let(:result) { formatter.call(log, nil) }
 
   let(:formatter) { described_class.new(**options) }
-  let(:options) { Hash[custom_names_mapping: custom_names_mapping] }
+  let(:options) { Hash[custom_names_mapping:] }
   let(:custom_names_mapping) { Hash[] }
 
   let(:log_level) { :debug }

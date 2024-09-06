@@ -9,7 +9,7 @@ gem "activesupport"
 gem "bundler"
 gem "ci-helper"
 gem "http"
-gem "net-pop", github: "ruby/net-pop" # See https://stackoverflow.com/questions/78617432/strange-bundle-update-issue-disappearing-net-pop-0-1-2-dependency
+gem "net-pop"
 gem "nokogiri"
 gem "nori"
 gem "pg"

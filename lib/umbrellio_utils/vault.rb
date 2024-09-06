@@ -22,7 +22,7 @@ module UmbrellioUtils
     def write_to_kv(engine_path:, secret_path:, data:)
       full_data_path = File.join(engine_path, "data", secret_path)
       full_meta_path = File.join(engine_path, "metadata", secret_path)
-      ::Vault.logical.write(full_data_path, data: data)
+      ::Vault.logical.write(full_data_path, data:)
       ::Vault.logical.write(full_meta_path, id: secret_path, max_versions: 1, cas_required: false)
     end
   end

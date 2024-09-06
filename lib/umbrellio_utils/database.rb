@@ -7,8 +7,8 @@ module UmbrellioUtils
     HandledConstaintError = Class.new(StandardError)
     InvalidPkError = Class.new(StandardError)
 
-    def handle_constraint_error(constraint_name, &block)
-      DB.transaction(savepoint: true, &block)
+    def handle_constraint_error(constraint_name, &)
+      DB.transaction(savepoint: true, &)
     rescue Sequel::UniqueConstraintViolation => e
       if constraint_name.to_s == get_violated_constraint_name(e)
         raise HandledConstaintError
@@ -23,7 +23,7 @@ module UmbrellioUtils
     end
 
     def each_record(dataset, primary_key: nil, **options, &block)
-      primary_key = primary_key_from(dataset, primary_key: primary_key)
+      primary_key = primary_key_from(dataset, primary_key:)
 
       with_temp_table(dataset, **options) do |ids|
         rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
@@ -47,11 +47,11 @@ module UmbrellioUtils
       primary_key: nil,
       temp_table_name: nil
     )
-      primary_key = primary_key_from(dataset, primary_key: primary_key)
+      primary_key = primary_key_from(dataset, primary_key:)
       sleep_interval = sleep_interval_from(sleep)
 
       temp_table_name = create_temp_table(
-        dataset, primary_key: primary_key, temp_table_name: temp_table_name&.to_sym
+        dataset, primary_key:, temp_table_name: temp_table_name&.to_sym
       )
 
       pk_set = []
@@ -77,7 +77,7 @@ module UmbrellioUtils
       temp_table_name ||= :"temp_#{model.table_name}_#{time.to_i}_#{time.nsec}"
       return temp_table_name if DB.table_exists?(temp_table_name)
 
-      primary_key = primary_key_from(dataset, primary_key: primary_key)
+      primary_key = primary_key_from(dataset, primary_key:)
 
       DB.create_table(temp_table_name, unlogged: true) do
         primary_key.each do |field|
