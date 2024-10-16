@@ -67,7 +67,8 @@ module UmbrellioUtils::Jobs
       weight_coef = capsule.weight / total_weight.to_f
       concurrency = (max_concurrency * weight_coef).to_i
       concurrency = 1 unless concurrency > 1
-      queues = self.queues.select { |x| x.capsule == capsule.name }.map { |x| [x.name, x.weight] }
+      queues =
+        self.queues.select { |x| x.capsule == capsule.name }.map { |x| [x.name.to_s, x.weight] }
       Entry.new(capsule.name, queues, concurrency)
     end
 

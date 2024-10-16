@@ -36,9 +36,9 @@ describe UmbrellioUtils::Jobs do
     specify do
       expect(result).to eq(
         [
-          UmbrellioUtils::Jobs::Entry.new(:default, [[:q3, 10], [:q4, 1]], 1),
-          UmbrellioUtils::Jobs::Entry.new(:cap1, [[:q1, 1]], 3),
-          UmbrellioUtils::Jobs::Entry.new(:cap2, [[:q2, 5]], 6),
+          UmbrellioUtils::Jobs::Entry.new(:default, [["q3", 10], ["q4", 1]], 1),
+          UmbrellioUtils::Jobs::Entry.new(:cap1, [["q1", 1]], 3),
+          UmbrellioUtils::Jobs::Entry.new(:cap2, [["q2", 5]], 6),
         ],
       )
     end
@@ -49,7 +49,7 @@ describe UmbrellioUtils::Jobs do
       specify do
         expect(result).to eq(
           [
-            UmbrellioUtils::Jobs::Entry.new(:cap3, [[:q5, 1]], 10),
+            UmbrellioUtils::Jobs::Entry.new(:cap3, [["q5", 1]], 10),
           ],
         )
       end
@@ -80,13 +80,13 @@ describe UmbrellioUtils::Jobs do
     specify do
       jobs.configure_capsules!(config, priority_level: "default", max_concurrency: 10)
 
-      expect(capsule_default.queues).to eq([[:q3, 10], [:q4, 1]])
+      expect(capsule_default.queues).to eq([["q3", 10], ["q4", 1]])
       expect(capsule_default.concurrency).to eq(1)
 
-      expect(capsule_cap1.queues).to eq([[:q1, 1]])
+      expect(capsule_cap1.queues).to eq([["q1", 1]])
       expect(capsule_cap1.concurrency).to eq(3)
 
-      expect(capsule_cap2.queues).to eq([[:q2, 5]])
+      expect(capsule_cap2.queues).to eq([["q2", 5]])
       expect(capsule_cap2.concurrency).to eq(6)
     end
 
@@ -94,7 +94,7 @@ describe UmbrellioUtils::Jobs do
       specify do
         jobs.configure_capsules!(config, priority_level: "w1", max_concurrency: 10)
 
-        expect(capsule_default.queues).to eq([[:q5, 1]])
+        expect(capsule_default.queues).to eq([["q5", 1]])
         expect(capsule_default.concurrency).to eq(10)
 
         expect(capsule_cap1.queues).to eq(nil)
