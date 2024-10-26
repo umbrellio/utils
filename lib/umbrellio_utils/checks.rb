@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+require "uri/mailto"
+
 module UmbrellioUtils
   module Checks
     extend self
 
-    EMAIL_REGEXP = /\A([\w+-].?)+@[a-z\d-]+(\.[a-z]+)*\.[a-z]+\z/i
     HOLDER_NAME_REGEXP = /\A([A-Za-z0-9.'-]+ ?)+\z/
 
     def secure_compare(src, dest)
@@ -30,11 +31,11 @@ module UmbrellioUtils
     end
 
     def valid_email?(email)
-      email.to_s =~ EMAIL_REGEXP
+      email.to_s.match?(URI::MailTo::EMAIL_REGEXP)
     end
 
     def valid_card_holder?(holder)
-      holder.to_s =~ HOLDER_NAME_REGEXP
+      holder.to_s.match?(HOLDER_NAME_REGEXP)
     end
 
     def valid_card_cvv?(cvv)
