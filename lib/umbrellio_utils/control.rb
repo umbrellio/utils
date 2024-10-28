@@ -24,7 +24,13 @@ module UmbrellioUtils
       checked_constraints: [],
       &block
     )
-      return yield if !retry_on_all_constraints && checked_constraints.empty?
+      if !retry_on_all_constraints && checked_constraints.empty?
+        begin
+          return yield
+        rescue Sequel::UniqueConstraintViolation => e
+          raise UniqueConstraintViolation, e.message
+        end
+      end
 
       retry_on(Sequel::UniqueConstraintViolation, times:) do
         DB.transaction(savepoint: true, &block)
