@@ -97,6 +97,7 @@ module UmbrellioUtils
     private
 
     def row(values)
+      return values if values.size == 1
       Sequel.function(:row, *values)
     end
 
