@@ -63,5 +63,15 @@ module UmbrellioUtils
         end
       end
     end
+
+    # needs any_ascii gem to work
+    def normalize_bank_name(name)
+      result = AnyAscii.transliterate(name).gsub(/[^A-Za-z0-9]+/, " ").upcase.squish
+      result.sub!(/\ATHE\s+/, "")
+      result.sub!(/\bLIMITED\b/, "LTD")
+      result.sub!(/\bCOMPANY\b/, "CO")
+      result.sub!(/\bCORPORATION\b/, "CORP")
+      result
+    end
   end
 end
