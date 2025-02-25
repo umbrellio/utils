@@ -136,6 +136,31 @@ describe UmbrellioUtils::Database, :db do
       end
     end
 
+    context "when primary key does not exist in table" do
+      before do
+        UserWithoutPk.multi_insert(users_data)
+      end
+
+      let(:users_data) do
+        Array.new(10) { |index| Hash[id: index + 1, email: "user#{index + 1}@email.com"] }
+      end
+      let(:options) { Hash[primary_key: :id] }
+
+      subject(:result_emails) do
+        users = []
+
+        described_class.each_record(UserWithoutPk.dataset, **options) do |user|
+          users << user
+        end
+
+        users.map(&:email)
+      end
+
+      it "runs correctly with explicit primary_key param" do
+        expect(result_emails).to eq(reversed_emails)
+      end
+    end
+
     context "some invalid option provided" do
       let(:options) { Hash[invalid: 1] }
 

@@ -25,7 +25,7 @@ module UmbrellioUtils
     def each_record(dataset, primary_key: nil, **options, &block)
       primary_key = primary_key_from(dataset, primary_key:)
 
-      with_temp_table(dataset, **options) do |ids|
+      with_temp_table(dataset, primary_key:, **options) do |ids|
         rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
         dataset.model.where(row(primary_key) => rows).reverse(row(primary_key)).each(&block)
       end

@@ -23,6 +23,12 @@ DB.create_table :users do
   column :email, :text
 end
 
+DB.drop_table? :users_without_pk
+DB.create_table :users_without_pk do
+  column :id, :integer
+  column :email, :text
+end
+
 DB.drop_table? :complex_users
 DB.create_table :complex_users do
   column :geo, :text
@@ -32,6 +38,12 @@ DB.create_table :complex_users do
 end
 
 class User < Sequel::Model(:users)
+  def skip_table_sync?
+    false
+  end
+end
+
+class UserWithoutPk < Sequel::Model(:users_without_pk)
   def skip_table_sync?
     false
   end
