@@ -40,6 +40,7 @@ module UmbrellioUtils
     # @option [Array] primary_key custom primary key to use for dataset
     # @option [Symbol, String] temp_table_name custom name for temporary table,
     #   table is reused if already exists
+    # rubocop:disable Metrics/ParameterLists
     def with_temp_table(
       dataset,
       page_size: 1_000,
@@ -70,6 +71,7 @@ module UmbrellioUtils
 
       DB.drop_table(temp_table_name)
     end
+    # rubocop:enable Metrics/ParameterLists
 
     def create_temp_table(dataset, primary_key: nil, temp_table_name: nil)
       time = Time.current
