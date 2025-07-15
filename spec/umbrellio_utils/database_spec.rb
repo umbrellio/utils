@@ -168,5 +168,13 @@ describe UmbrellioUtils::Database, :db do
         expect { result_emails }.to raise_error(ArgumentError)
       end
     end
+
+    context "without transaction" do
+      let(:options) { Hash[transaction: false] }
+
+      it "doesn't raise error" do
+        expect(result_emails).to eq(reversed_emails)
+      end
+    end
   end
 end

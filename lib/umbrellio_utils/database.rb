@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ModuleLength
 module UmbrellioUtils
   module Database
     extend self
@@ -40,12 +41,14 @@ module UmbrellioUtils
     # @option [Array] primary_key custom primary key to use for dataset
     # @option [Symbol, String] temp_table_name custom name for temporary table,
     #   table is reused if already exists
+    # rubocop:disable Metrics/ParameterLists
     def with_temp_table(
       dataset,
       page_size: 1_000,
       sleep: nil,
       primary_key: nil,
-      temp_table_name: nil
+      temp_table_name: nil,
+      transaction: true
     )
       primary_key = primary_key_from(dataset, primary_key:)
       sleep_interval = sleep_interval_from(sleep)
@@ -57,7 +60,7 @@ module UmbrellioUtils
       pk_set = []
 
       loop do
-        DB.transaction do
+        conditional_transaction(transaction) do
           pk_set = pop_next_pk_batch(temp_table_name, primary_key, page_size)
           yield(pk_set) if pk_set.any?
         end
@@ -69,6 +72,7 @@ module UmbrellioUtils
 
       DB.drop_table(temp_table_name)
     end
+    # rubocop:enable Metrics/ParameterLists
 
     def create_temp_table(dataset, primary_key: nil, temp_table_name: nil)
       time = Time.current
@@ -95,6 +99,14 @@ module UmbrellioUtils
     end
 
     private
+
+    def conditional_transaction(transaction, &)
+      if transaction
+        DB.transaction(&)
+      else
+        yield
+      end
+    end
 
     def row(values)
       return values if values.size == 1
@@ -137,3 +149,4 @@ module UmbrellioUtils
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
