@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ModuleLength
 module UmbrellioUtils
   module Database
     extend self
@@ -148,3 +149,4 @@ module UmbrellioUtils
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
