@@ -182,6 +182,7 @@ describe UmbrellioUtils::Database, :db do
 
       let!(:users) { User.all }
       let(:tokens_data) { Array.new(10) { |i| { user_id: users[i].id } } }
+      let!(:old_loggers) { DB.loggers }
 
       let!(:db_logger) do
         DB.logger = Class.new(Logger) do
@@ -205,6 +206,7 @@ describe UmbrellioUtils::Database, :db do
       end
 
       before { UserToken.multi_insert(tokens_data) }
+      after { DB.loggers = old_loggers }
 
       it "preloads users" do
         expect(result_users.map(&:id)).to eq(users.map(&:id).reverse)
