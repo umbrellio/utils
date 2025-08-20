@@ -62,7 +62,7 @@ class ComplexUser < Sequel::Model(:complex_users)
 end
 
 class UserToken < Sequel::Model(:user_tokens)
-  many_to_one :user , class: "User", key: :user_id
+  many_to_one :user, class: "User", key: :user_id
 
   def skip_table_sync?
     false
