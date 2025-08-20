@@ -189,7 +189,7 @@ describe UmbrellioUtils::Database, :db do
 
           def add(_, _, msg)
             self.queries ||= []
-            queries << msg if msg.match?(/FROM "users"/)
+            queries << msg if msg.include?('FROM "users"')
           end
         end.new(nil)
       end
