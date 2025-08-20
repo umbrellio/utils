@@ -25,10 +25,15 @@ module UmbrellioUtils
 
     def each_record(dataset, primary_key: nil, **options, &block)
       primary_key = primary_key_from(dataset, primary_key:)
+      eager_tables = Array(options.delete(:eager_load))
 
       with_temp_table(dataset, primary_key:, **options) do |ids|
         rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
-        dataset.model.where(row(primary_key) => rows).reverse(row(primary_key)).each(&block)
+        records = dataset.model
+               .eager(eager_tables)
+               .where(row(primary_key) => rows)
+               .reverse(row(primary_key)).all
+        records.each(&block)
       end
     end
 

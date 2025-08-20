@@ -176,5 +176,42 @@ describe UmbrellioUtils::Database, :db do
         expect(result_emails).to eq(reversed_emails)
       end
     end
+
+    context "with eager_load" do
+      let(:options) { Hash[eager_load: [:user]] }
+
+      let!(:users) { User.all }
+      let(:tokens_data) { Array.new(10) { |i| { user_id: users[i].id } } }
+
+      let!(:db_logger) do
+        logger = Class.new(Logger) do
+          attr_accessor :queries
+
+          def add(_, _, msg)
+            self.queries ||= []
+            queries << msg if msg.include?('FROM "users"')
+          end
+        end.new(nil)
+        logger.tap { |x| DB.loggers << x }
+      end
+
+      subject(:result_users) do
+        tokens = []
+
+        described_class.each_record(UserToken.dataset, **options) do |token|
+          tokens << token
+        end
+
+        tokens.map(&:user)
+      end
+
+      before { UserToken.multi_insert(tokens_data) }
+      after { DB.loggers.pop }
+
+      it "preloads users" do
+        expect(result_users.map(&:id)).to eq(users.map(&:id).reverse)
+        expect(db_logger.queries.size).to eq(1)
+      end
+    end
   end
 end
