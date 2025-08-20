@@ -28,7 +28,6 @@ describe UmbrellioUtils::Database, :db do
 
   describe "#each_record" do
     before do
-      p 123
       User.multi_insert(users_data)
       allow(Kernel).to receive(:sleep) { |value| sleep_calls << value }
     end
@@ -181,7 +180,8 @@ describe UmbrellioUtils::Database, :db do
     context "with eager_load" do
       let(:options) { Hash[eager_load: [:user]] }
 
-      let(:tokens_data) { Array.new(10) { |index| Hash[user_id: index + 1] } }
+      let!(:users) { User.all }
+      let(:tokens_data) { Array.new(10) { |i| { user_id: users[i].id } } }
 
       let!(:db_logger) do
         DB.logger = Class.new(Logger) do
@@ -207,7 +207,7 @@ describe UmbrellioUtils::Database, :db do
       before { UserToken.multi_insert(tokens_data) }
 
       it "preloads users" do
-        expect(result_users.map(&:id)).to eq([10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
+        expect(result_users.map(&:id)).to eq(users.map(&:id).reverse)
         expect(db_logger.queries.size).to eq(1)
       end
     end
