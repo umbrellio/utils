@@ -4,7 +4,7 @@ require "logger"
 
 begin
   db_name = "umbrellio_utils_test"
-  DB = Sequel.connect(ENV.fetch("DB_URL", "postgres://localhost/#{db_name}"))
+  DB = Sequel.connect(ENV.fetch("DB_URL", "postgres:///#{db_name}"))
 rescue Sequel::DatabaseConnectionError => error
   puts error
   abort "You probably need to create a test database. " \
@@ -17,7 +17,7 @@ Sequel::Model.db = DB
 
 DB.extension :batches
 
-DB.drop_table? :users
+DB.drop_table? :users, cascade: true
 DB.create_table :users do
   primary_key :id
   column :email, :text
@@ -37,6 +37,12 @@ DB.create_table :complex_users do
   primary_key %i[geo nick]
 end
 
+DB.drop_table? :user_tokens
+DB.create_table :user_tokens do
+  primary_key :id
+  foreign_key :user_id, :users
+end
+
 class User < Sequel::Model(:users)
   def skip_table_sync?
     false
@@ -50,6 +56,14 @@ class UserWithoutPk < Sequel::Model(:users_without_pk)
 end
 
 class ComplexUser < Sequel::Model(:complex_users)
+  def skip_table_sync?
+    false
+  end
+end
+
+class UserToken < Sequel::Model(:user_tokens)
+  many_to_one :user , class: "User", key: :user_id
+
   def skip_table_sync?
     false
   end
