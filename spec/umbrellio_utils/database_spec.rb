@@ -184,14 +184,15 @@ describe UmbrellioUtils::Database, :db do
       let(:tokens_data) { Array.new(10) { |i| { user_id: users[i].id } } }
 
       let!(:db_logger) do
-        Class.new(Logger) do
+        logger = Class.new(Logger) do
           attr_accessor :queries
 
           def add(_, _, msg)
             self.queries ||= []
             queries << msg if msg.include?('FROM "users"')
           end
-        end.new(nil).tap { |x| DB.loggers << x }
+        end.new(nil)
+        logger.tap { |x| DB.loggers << x }
       end
 
       subject(:result_users) do
@@ -205,6 +206,7 @@ describe UmbrellioUtils::Database, :db do
       end
 
       before { UserToken.multi_insert(tokens_data) }
+      after { DB.loggers.pop }
 
       it "preloads users" do
         expect(result_users.map(&:id)).to eq(users.map(&:id).reverse)
