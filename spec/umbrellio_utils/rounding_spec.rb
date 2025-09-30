@@ -5,7 +5,7 @@ describe UmbrellioUtils::Rounding do
     subject(:rounded_number) { described_class.fancy_round(number, **kwargs) }
 
     let(:number) { 122.12 }
-    let(:kwargs) { Hash[] }
+    let(:kwargs) { {} }
 
     context "with the round method" do
       specify { expect(rounded_number).to eq(100.0) }
@@ -34,7 +34,7 @@ describe UmbrellioUtils::Rounding do
     subject(:rounded_number) { described_class.super_round(number, **kwargs) }
 
     let(:number) { 3221.53 }
-    let(:kwargs) { Hash[] }
+    let(:kwargs) { {} }
 
     context "with the round method" do
       specify { expect(rounded_number).to eq(2500.0) }

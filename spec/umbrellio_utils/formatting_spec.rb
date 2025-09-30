@@ -5,7 +5,7 @@ describe UmbrellioUtils::Formatting do
     subject(:expanded_hash) { described_class.expand_hash(hash, **kwargs) }
 
     let(:hash) { Hash["deep.first": true, "deep.second": false, root: "kek"] }
-    let(:kwargs) { Hash[] }
+    let(:kwargs) { {} }
 
     it "properly expands and resets defaults" do
       expect(expanded_hash).to eq(deep: { first: true, second: false }, root: "kek")
@@ -36,7 +36,7 @@ describe UmbrellioUtils::Formatting do
     subject(:expanded_hash) { described_class.deeply_expand_hash(hash, **kwargs) }
 
     let(:hash) { Hash[app: { "very.deep": "value" }, key: "value"] }
-    let(:kwargs) { Hash[] }
+    let(:kwargs) { {} }
 
     it { is_expected.to eq(app: { very: { deep: "value" } }, key: "value") }
 
