@@ -47,6 +47,7 @@ module UmbrellioUtils
       # @param logger [SemanticLogger::Logger] active logger.
       # @return [String] data
       def call(log, _logger)
+        eval 'require "irb"; binding.irb', binding, __FILE__, __LINE__
         data = build_data_for(log)
         data.to_json
       end
