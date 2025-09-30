@@ -47,7 +47,6 @@ module UmbrellioUtils
       # @param logger [SemanticLogger::Logger] active logger.
       # @return [String] data
       def call(log, _logger)
-        eval 'require "irb"; binding.irb', binding, __FILE__, __LINE__
         data = build_data_for(log)
         data.to_json
       end
@@ -83,7 +82,7 @@ module UmbrellioUtils
       # Calculates MD5 fingerprint for the thread in which the log was made.
       # @return [String] truncated `MD5` hash.
       def thread_fingerprint(log)
-        eval 'require "irb"; binding.irb', binding, __FILE__, __LINE__
+        Digest::MD5.hexdigest(log.process_info)[0, 8]
       end
 
       # Renders either exception or message of the log.

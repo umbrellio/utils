@@ -1,19 +1,6 @@
 # frozen_string_literal: true
 
 describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
-  before { stub_const("UmbrellioUtils::SemanticLogger::TinyJsonFormatter::Process", process_stub) }
-  before { stub_const("UmbrellioUtils::SemanticLogger::TinyJsonFormatter::Thread", thread_stub) }
-
-  let(:process_stub) do
-    class_double(Process).tap do |klass|
-      allow(klass).to receive(:pid).and_return(2222)
-    end
-  end
-
-  let(:thread_stub) do
-    double(current: instance_double(Thread, object_id: 1111))
-  end
-
   let(:log) do
     instance_double(SemanticLogger::Log).tap do |instance|
       allow(instance).to receive_messages(
@@ -24,6 +11,7 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
         tags: log_tags,
         named_tags: log_named_tags,
         time: log_time,
+        process_info: log_process_info,
       )
     end
   end
@@ -31,15 +19,16 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
 
   let(:formatter) { described_class.new(**options) }
   let(:options) { Hash[custom_names_mapping:] }
-  let(:custom_names_mapping) { Hash[] }
+  let(:custom_names_mapping) { {} }
 
   let(:log_level) { :debug }
   let(:log_name) { "SomeName" }
   let(:log_message) { "Some Message" }
   let(:log_exception) { nil }
   let(:log_tags) { [] }
-  let(:log_named_tags) { Hash[] }
+  let(:log_named_tags) { {} }
   let(:log_time) { Time.utc(2007) }
+  let(:log_process_info) { "1111-2222" }
 
   # md5(1111-2222) = b78cbe5f798598ea7f1ab6dc4158499d
   let(:expected_thread_fingerprint) { "b78cbe5f" }
