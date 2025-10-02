@@ -77,6 +77,24 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
     end
   end
 
+  context "message with some colorization" do
+    let(:log_message) do
+      "\e[1m\e[35mSQL (Total: 9MS, CH: 2MS)\e\e[0m SELECT \"database\"\e"
+    end
+
+    it "removes colorization" do
+      expect(result).to be_json_as(
+        severity: "DEBUG",
+        name: "SomeName",
+        thread_fingerprint: expected_thread_fingerprint,
+        message: "SQL (Total: 9MS, CH: 2MS) SELECT \"database\"",
+        time: "2007-01-01T00:00:00.000000000Z",
+        tags: [],
+        named_tags: {},
+      )
+    end
+  end
+
   context "with invalid mapping" do
     let(:custom_names_mapping) { Hash[kek: :pek] }
 

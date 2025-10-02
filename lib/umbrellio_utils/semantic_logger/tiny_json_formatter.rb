@@ -72,7 +72,7 @@ module UmbrellioUtils
           log.level.upcase,
           log.name,
           thread_fingerprint(log),
-          truncate(log_to_message(log)),
+          uncolorize(truncate(log_to_message(log))),
           log.tags,
           log.named_tags,
           log.time.utc.iso8601(9),
@@ -104,6 +104,10 @@ module UmbrellioUtils
         msg = msg[0, message_size_limit - suffix.size]
 
         "#{msg}#{suffix}"
+      end
+
+      def uncolorize(msg)
+        msg.gsub(/\e\[[0-9;]*[A-Za-z]/, "").delete("\e")
       end
     end
   end
