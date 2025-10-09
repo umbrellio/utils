@@ -20,7 +20,7 @@ module UmbrellioUtils
       xml.remove_namespaces!
       xml.xpath("//@*").remove if remove_attributes
 
-      tags_converter = snakecase ? -> (tag) { snakecase(tag).to_sym } : -> (tag) { tag.to_sym }
+      tags_converter = snakecase ? -> (tag) { snakecase(tag).to_sym } : lambda(&:to_sym)
       nori = Nori.new(convert_tags_to: tags_converter, convert_dashes_to_underscores: false)
       nori.parse(xml.to_xml(save_with: Nokogiri::XML::Node::SaveOptions::NO_DECLARATION))
     end

@@ -11,7 +11,7 @@ describe UmbrellioUtils::Parsing do
       </root>
     XML
 
-    let(:kwargs) { Hash[] }
+    let(:kwargs) { {} }
 
     specify do
       expect(parsed_data).to eq(

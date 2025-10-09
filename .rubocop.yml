@@ -25,3 +25,6 @@ Style/HashConversion:
 
 Naming/VariableNumber:
   CheckSymbols: false
+
+Naming/PredicateMethod:
+  Enabled: false

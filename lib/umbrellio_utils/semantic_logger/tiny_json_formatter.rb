@@ -71,8 +71,8 @@ module UmbrellioUtils
         [
           log.level.upcase,
           log.name,
-          thread_fingerprint,
-          truncate(log_to_message(log)),
+          thread_fingerprint(log),
+          uncolorize(truncate(log_to_message(log))),
           log.tags,
           log.named_tags,
           log.time.utc.iso8601(9),
@@ -81,15 +81,15 @@ module UmbrellioUtils
 
       # Calculates MD5 fingerprint for the thread in which the log was made.
       # @return [String] truncated `MD5` hash.
-      def thread_fingerprint
-        Digest::MD5.hexdigest("#{Thread.current.object_id}-#{Process.pid}")[0...8]
+      def thread_fingerprint(log)
+        Digest::MD5.hexdigest(log.process_info)[0, 8]
       end
 
       # Renders either exception or message of the log.
       # @return [String]
       def log_to_message(log)
         if (e = log.exception)
-          msg = +"#{e.message} (#{e.class})"
+          msg = "#{e.message} (#{e.class})"
           msg << "\n#{e.backtrace.join("\n")}" if e.backtrace
           msg
         else
@@ -104,6 +104,10 @@ module UmbrellioUtils
         msg = msg[0, message_size_limit - suffix.size]
 
         "#{msg}#{suffix}"
+      end
+
+      def uncolorize(msg)
+        msg.gsub(/\e\[[0-9;]*[A-Za-z]/, "").delete("\e")
       end
     end
   end

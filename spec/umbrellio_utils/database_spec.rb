@@ -33,7 +33,7 @@ describe UmbrellioUtils::Database, :db do
     end
 
     let(:sleep_calls) { [] }
-    let(:options) { Hash[] }
+    let(:options) { {} }
 
     let(:users_data) do
       Array.new(10) { |index| Hash[email: "user#{index + 1}@email.com"] }
