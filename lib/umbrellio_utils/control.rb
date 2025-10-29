@@ -52,12 +52,12 @@ module UmbrellioUtils
       nil
     end
 
-    def retry_on(exception, times: Float::INFINITY, wait: 0)
+    def retry_on(*exceptions, times: Float::INFINITY, wait: 0)
       retries = 0
 
       begin
         yield
-      rescue exception
+      rescue *exceptions
         retries += 1
         raise if retries > times
         sleep(wait)
