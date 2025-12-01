@@ -12,6 +12,9 @@ Naming/MethodParameterName:
 RSpec/EmptyLineAfterHook:
   Enabled: false
 
+Metrics/ModuleLength:
+  Enabled: false
+
 Naming/FileName:
   Exclude:
     - lib/umbrellio-utils.rb

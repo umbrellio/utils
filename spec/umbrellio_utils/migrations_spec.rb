@@ -36,7 +36,9 @@ describe UmbrellioUtils::Migrations do
     end
 
     def check_contains_fk!
-      expect(expected_foreign_key).to include(columns: [:test_migration_id], table: :test_migrations)
+      expect(expected_foreign_key).to include(
+        columns: [:test_migration_id], table: :test_migrations,
+      )
     end
 
     def check_contains_no_fk!

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module UmbrellioUtils
-  module Migrations # rubocop:disable Metrics/ModuleLength
+  module Migrations
     extend self
 
     def create_new_id_bigint_column(table_name)

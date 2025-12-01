@@ -31,19 +31,19 @@ module UmbrellioUtils
         end
       end
 
-      def query(dataset, host: nil, **)
+      def query(dataset, host: nil, **opts)
         sql = sql_for(dataset)
 
         log_errors(sql) do
-          select_all(sql, host:, **).map { Misc::StrictHash[it.symbolize_keys] }
+          select_all(sql, host:, **opts).map { |x| Misc::StrictHash[x.symbolize_keys] }
         end
       end
 
-      def query_value(dataset, host: nil, **)
+      def query_value(dataset, host: nil, **opts)
         sql = sql_for(dataset)
 
         log_errors(sql) do
-          select_value(sql, host:, **)
+          select_value(sql, host:, **opts)
         end
       end
 
@@ -67,7 +67,7 @@ module UmbrellioUtils
         sql = "DESCRIBE TABLE #{full_table_name(table_name, db_name)} FORMAT JSON"
 
         log_errors(sql) do
-          select_all(sql).map { Misc::StrictHash[it.symbolize_keys] }
+          select_all(sql).map { |x| Misc::StrictHash[x.symbolize_keys] }
         end
       end
 
@@ -100,10 +100,14 @@ module UmbrellioUtils
         Sequel.function(:postgresql, "#{host}:#{port}", database, table, username, password)
       end
 
-      def with_temp_table(dataset, primary_key: [:id], primary_key_types: [:integer], temp_table_name:, **, &)
-        UmbrellioUtils::Database.create_temp_table(nil, primary_key:, primary_key_types:, temp_table_name:, &)
+      def with_temp_table(
+        dataset, temp_table_name:, primary_key: [:id], primary_key_types: [:integer], **opts, &
+      )
+        UmbrellioUtils::Database.create_temp_table(
+          nil, primary_key:, primary_key_types:, temp_table_name:, &
+        )
         populate_temp_table!(temp_table_name, dataset)
-        UmbrellioUtils::Database.with_temp_table(nil, primary_key:, temp_table_name:, **, &)
+        UmbrellioUtils::Database.with_temp_table(nil, primary_key:, temp_table_name:, **opts, &)
       end
 
       private
@@ -135,7 +139,8 @@ module UmbrellioUtils
 
       def sql_for(dataset)
         unless ch_dataset?(dataset)
-          raise "Non-ClickHouse dataset: #{dataset.inspect}. You should use `CH.from` instead of `DB`"
+          raise "Non-ClickHouse dataset: #{dataset.inspect}. " \
+                "You should use `CH.from` instead of `DB`"
         end
 
         dataset.sql
@@ -144,7 +149,7 @@ module UmbrellioUtils
       def ch_dataset?(dataset)
         case dataset
         when Sequel::Dataset
-          dataset.opts[:ch] && Array(dataset.opts[:from]).all? { ch_dataset?(it) }
+          dataset.opts[:ch] && Array(dataset.opts[:from]).all? { |x| ch_dataset?(x) }
         when Sequel::SQL::AliasedExpression
           ch_dataset?(dataset.expression)
         when Sequel::SQL::Identifier, Sequel::SQL::QualifiedIdentifier
@@ -159,8 +164,8 @@ module UmbrellioUtils
         "#{db_name}.#{table_name}"
       end
 
-      def select_all(sql, host: nil, **)
-        response = client(host).get(body: sql, query: { default_format: "JSON", ** })
+      def select_all(sql, host: nil, **opts)
+        response = client(host).get(body: sql, query: { default_format: "JSON", **opts })
         ::ClickHouse::Response::Factory.response(response, client(host).config)
       end
 
@@ -170,7 +175,8 @@ module UmbrellioUtils
 
       def populate_temp_table!(temp_table_name, dataset)
         execute(<<~SQL.squish)
-          INSERT INTO TABLE FUNCTION #{DB.literal(pg_table_connection(temp_table_name))} #{dataset.sql}
+          INSERT INTO TABLE FUNCTION #{DB.literal(pg_table_connection(temp_table_name))}
+          #{dataset.sql}
         SQL
       end
     end
