@@ -93,9 +93,9 @@ module UmbrellioUtils
       def pg_table_connection(table)
         host = DB.opts[:host].presence || "localhost"
         port = DB.opts[:port] || 5432
-        database = DB.opts[:database] || ENV.fetch("USER")
-        username = DB.opts[:user] || ENV.fetch("USER")
-        password = DB.opts[:password] || ENV.fetch("PASSWORD", "")
+        database = DB.opts[:database]
+        username = DB.opts[:user]
+        password = DB.opts[:password]
 
         Sequel.function(:postgresql, "#{host}:#{port}", database, table, username, password)
       end

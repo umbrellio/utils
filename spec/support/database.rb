@@ -4,7 +4,13 @@ require "logger"
 
 begin
   db_name = "umbrellio_utils_test"
-  DB = Sequel.connect(ENV.fetch("DB_URL", "postgres:///#{db_name}"))
+  DB = Sequel.postgres(
+    "umbrellio_utils_test",
+    user: "user",
+    password: "pass",
+    host: "pg",
+    port: 5432,
+  )
 rescue Sequel::DatabaseConnectionError => error
   puts error
   abort "You probably need to create a test database. " \
