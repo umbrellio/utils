@@ -132,7 +132,7 @@ describe UmbrellioUtils::Migrations do
       it "raises error" do
         stub_const("TestMigrationReference", Class.new(Sequel::Model(:test_migrations)) do
           def test_migration
-            Struct.new(:test_migration_references).new(test_migration_references: [])
+            Struct.new(:test_migration_references).new([])
           end
         end)
 
