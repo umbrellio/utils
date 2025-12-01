@@ -44,7 +44,7 @@ jobs:
             --network dbnet \
             -p 9000:9000 -p 8123:8123 \
             -v ${{ github.workspace }}/.github/clickhouse/clickhouse_keeper.xml:/etc/clickhouse-server/config.d/keeper.xml \
-            clickhouse/clickhouse-server:25
+            clickhouse/clickhouse-server:25.3.6.56-alpine
 
       - name: Wait for Postgres
         run: |
@@ -61,14 +61,6 @@ jobs:
             sleep 1
           done
           exit 1
-
-      - name: Start ClickHouse with mounted config
-        run: |
-          docker run -d --name ch \
-            -e CLICKHOUSE_SKIP_USER_SETUP=1 -e CLICKHOUSE_DB=umbrellio_utils_test -p 8123:8123 -p 9000:9000 \
-            -v ${{ github.workspace }}/.github/clickhouse/config.xml:/etc/clickhouse-server/config.xml \
-            -v ${{ github.workspace }}/.github/clickhouse/clickhouse_keeper.xml:/etc/clickhouse-server/config.d/clickhouse_keeper.xml \
-            clickhouse/clickhouse-server:25.3.6.56-alpine
 
       - uses: ruby/setup-ruby@v1
         with:
