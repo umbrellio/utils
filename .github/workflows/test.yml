@@ -42,9 +42,9 @@ jobs:
           - ./.github/clickhouse/config.d:/etc/clickhouse-server/config.d
         options: >-
           --health-cmd "curl -f http://localhost:8123/ping || exit 1"
-          --health-interval 1s
+          --health-interval 10s
           --health-timeout 5s
-          --health-retries 30
+          --health-retries 5
     env:
       PGHOST: localhost
       PGUSER: root
