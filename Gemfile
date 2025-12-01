@@ -8,6 +8,8 @@ gemspec
 gem "activesupport"
 gem "bundler"
 gem "ci-helper"
+gem "click_house", github: "umbrellio/click_house", branch: "master"
+gem "csv"
 gem "http"
 gem "net-pop"
 gem "nokogiri"

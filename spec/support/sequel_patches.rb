@@ -6,8 +6,10 @@ RSpec.configure do |config|
     class Sequel::Postgres::Dataset # rubocop:disable Lint/ConstantDefinitionInBlock
       def select_sql
         return super if @opts[:_skip_order_patch]
+        return super if @opts[:ch] && @opts[:order].present?
         order = @opts[:order].dup || []
-        order << Sequel.function(:random)
+        fn = @opts.key?(:ch) ? :rand : :random
+        order << Sequel.function(fn)
         clone(order:, _skip_order_patch: true).select_sql
       end
     end

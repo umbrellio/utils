@@ -16,6 +16,8 @@ DB.logger = Logger.new("log/db.log")
 Sequel::Model.db = DB
 
 DB.extension :batches
+DB.extension :pg_json
+DB.extension :pg_range
 
 DB.drop_table? :users, cascade: true
 DB.create_table :users do
@@ -67,4 +69,13 @@ class UserToken < Sequel::Model(:user_tokens)
   def skip_table_sync?
     false
   end
+end
+
+class TestMigration < Sequel::Model(:test_migrations)
+  one_to_many :test_migration_references,
+              class_name: "TestMigrationReference", key: :test_migration_id, primary_key: :id
+end
+
+class TestMigrationReference < Sequel::Model(:test_migration_references)
+  many_to_one :test_migration, class_name: "TestMigration", key: :test_migration_id
 end

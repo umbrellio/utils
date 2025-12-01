@@ -79,26 +79,28 @@ module UmbrellioUtils
     end
     # rubocop:enable Metrics/ParameterLists
 
-    def create_temp_table(dataset, primary_key: nil, temp_table_name: nil)
+    def create_temp_table(dataset, primary_key: nil, primary_key_types: nil, temp_table_name: nil)
       time = Time.current
-      model = dataset.model
+      query_table_name = dataset&.model&.table_name
 
-      temp_table_name ||= :"temp_#{model.table_name}_#{time.to_i}_#{time.nsec}"
+      temp_table_name ||= :"temp_#{query_table_name}_#{time.to_i}_#{time.nsec}"
       return temp_table_name if DB.table_exists?(temp_table_name)
 
       primary_key = primary_key_from(dataset, primary_key:)
+      primary_key_types ||= primary_key.map { |x| dataset.model.db_schema[x][:db_type] }
 
       DB.create_table(temp_table_name, unlogged: true) do
-        primary_key.each do |field|
-          type = model.db_schema[field][:db_type]
-          column(field, type)
+        primary_key.each.with_index do |field, i|
+          column(field, primary_key_types[i])
         end
 
         primary_key(primary_key)
       end
 
-      insert_ds = dataset.select(*qualified_pk(model.table_name, primary_key))
-      DB[temp_table_name].disable_insert_returning.insert(insert_ds)
+      unless dataset.nil?
+        insert_ds = dataset.select(*qualified_pk(query_table_name, primary_key))
+        DB[temp_table_name].disable_insert_returning.insert(insert_ds)
+      end
 
       temp_table_name
     end

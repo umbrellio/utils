@@ -1,0 +1,19 @@
+#!/usr/bin/env -S bash -eu
+
+docker stop clickhouse-server || true
+docker rm clickhouse-server || true
+
+docker run \
+  --detach \
+  --network host \
+  --name clickhouse-server \
+  --ulimit nofile=262144:262144 \
+  $CLICKHOUSE_IMAGE_TAG
+
+# Wait for ClickHouse server to become available
+until docker exec clickhouse-server clickhouse-client --query "SELECT 1" &>/dev/null; do
+  echo "Waiting for ClickHouse to be ready..."
+  sleep 1
+done
+
+rails ch:create ch:migrate

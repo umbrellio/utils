@@ -4,6 +4,11 @@ module UmbrellioUtils
   module Misc
     extend self
 
+    class StrictHash < Hash
+      alias get []
+      alias [] fetch
+    end
+
     def table_sync(scope, delay: 1, routing_key: nil)
       scope.in_batches do |batch|
         batch_for_sync = batch.all.reject { |model| model.try(:skip_table_sync?) }
