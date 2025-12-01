@@ -91,7 +91,7 @@ module UmbrellioUtils
       end
 
       def pg_table_connection(table)
-        host = DB.opts[:host].presence || "localhost"
+        host = ENV["PGHOST"] || DB.opts[:host].presence || "localhost"
         port = DB.opts[:port] || 5432
         database = DB.opts[:database]
         username = DB.opts[:user]

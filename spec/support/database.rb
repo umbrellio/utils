@@ -8,7 +8,7 @@ begin
     "umbrellio_utils_test",
     user: "user",
     password: "pass",
-    host: "pg",
+    host: "localhost",
     port: 5432,
   )
 rescue Sequel::DatabaseConnectionError => error
