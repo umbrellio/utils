@@ -45,6 +45,18 @@ DB.create_table :user_tokens do
   foreign_key :user_id, :users
 end
 
+DB.drop_table? :test_migrations, cascade: true
+DB.create_table :test_migrations do
+  primary_key :id
+  column :test, :text
+end
+
+DB.drop_table? :test_migration_references
+DB.create_table :test_migration_references do
+  primary_key :id
+  foreign_key :test_migration_id, :test_migrations
+end
+
 class User < Sequel::Model(:users)
   def skip_table_sync?
     false
