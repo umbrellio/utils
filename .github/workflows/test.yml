@@ -50,11 +50,6 @@ jobs:
       PGUSER: root
 
     steps:
-      - name: Prepare ClickHouse config
-        run: |
-          mkdir -p /tmp/clickhouse-config
-          cp ./.github/clickhouse/config.d/*.xml /tmp/clickhouse-config/
-
       - uses: actions/checkout@v2
 
       - uses: ruby/setup-ruby@v1
