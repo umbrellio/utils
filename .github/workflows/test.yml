@@ -41,6 +41,8 @@ jobs:
         ports:
           - 8123:8123
           - 9000:9000
+        volumes:
+          - ./.github/clickhouse/config.d:/etc/clickhouse-server/config.d
         options: >-
           --health-cmd "curl -f http://localhost:8123/ping || exit 1"
           --health-interval 1s

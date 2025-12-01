@@ -1,0 +1,12 @@
+<yandex>
+  <remote_servers>
+    <click_cluster>
+      <shard>
+        <replica>
+          <host>localhost</host>
+          <port>9000</port>
+        </replica>
+      </shard>
+    </click_cluster>
+  </remote_servers>
+</yandex>
