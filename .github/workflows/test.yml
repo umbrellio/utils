@@ -30,14 +30,24 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+
+      clickhouse:
+        image: clickhouse/clickhouse-server:latest
+        env:
+          CLICKHOUSE_CLUSTER_NAME: click_cluster
+        ports:
+          - 8123:8123
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:8123/ping || exit 1"
+          --health-interval 1s
+          --health-timeout 5s
+          --health-retries 30
     env:
       PGHOST: localhost
       PGUSER: root
 
     steps:
-      - name: "Setup ClickHouse Server"
-        uses: getsentry/action-clickhouse-in-ci@v1.6
-
       - uses: actions/checkout@v2
 
       - uses: ruby/setup-ruby@v1
