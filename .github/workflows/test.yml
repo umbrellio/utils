@@ -41,8 +41,7 @@ jobs:
         run: |
           docker run -d --name ch \
             -e CLICKHOUSE_SKIP_USER_SETUP=1 -e CLICKHOUSE_DB=umbrellio_utils_test -p 8123:8123 -p 9000:9000 \
-            -v ${{ github.workspace }}/.github/clickhouse/config.d:/etc/clickhouse-server/config.d \
-            -v ${{ github.workspace }}/.github/clickhouse/users.d:/etc/clickhouse-server/users.d \
+            -v ${{ github.workspace }}/.github/clickhouse/config.xml:/etc/clickhouse-server/config.xml \
             clickhouse/clickhouse-server:25.3.6.56-alpine
 
       - uses: ruby/setup-ruby@v1
