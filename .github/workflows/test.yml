@@ -40,7 +40,7 @@ jobs:
           - 8123:8123
           - 9000:9000
         volumes:
-          - ./.github/clickhouse/config.d:/etc/clickhouse-server/config.d
+          - ./.github/clickhouse/config.d:/etc/clickhouse-server/config.d:ro
         options: >-
           --health-cmd "clickhouse-client --query \"SELECT * FROM system.build_options\""
           --health-interval 10s
