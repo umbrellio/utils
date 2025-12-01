@@ -40,7 +40,7 @@ jobs:
           - 8123:8123
           - 9000:9000
         volumes:
-          - ./.github/clickhouse/config.d:/etc/clickhouse-server/config.d
+          - /tmp/clickhouse-config:/etc/clickhouse-server/config.d:ro
         options: >-
           --user=clickhouse
           --health-cmd "clickhouse-client --query \"SELECT * FROM system.build_options\""
@@ -52,6 +52,11 @@ jobs:
       PGUSER: root
 
     steps:
+      - name: Prepare ClickHouse config
+        run: |
+          mkdir -p /tmp/clickhouse-config
+          cp .github/clickhouse/config.d/*.xml /tmp/clickhouse-config/
+
       - uses: actions/checkout@v2
 
       - uses: ruby/setup-ruby@v1
