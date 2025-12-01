@@ -55,7 +55,7 @@ jobs:
       - name: Prepare ClickHouse config
         run: |
           mkdir -p /tmp/clickhouse-config
-          cp .github/clickhouse/config.d/*.xml /tmp/clickhouse-config/
+          cp ./.github/clickhouse/config.d/*.xml /tmp/clickhouse-config/
 
       - uses: actions/checkout@v2
 
