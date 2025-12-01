@@ -35,6 +35,9 @@ jobs:
       PGUSER: root
 
     steps:
+      - name: "Setup ClickHouse Server"
+        uses: getsentry/action-clickhouse-in-ci@v1.6
+
       - uses: actions/checkout@v2
 
       - uses: ruby/setup-ruby@v1
