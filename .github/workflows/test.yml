@@ -32,12 +32,9 @@ jobs:
           - 5432:5432
 
       clickhouse:
-        image: clickhouse/clickhouse-server:latest
+        image: clickhouse/clickhouse-server:25.3.6.56-alpine
         env:
-          CLICKHOUSE_USER: test
-          CLICKHOUSE_PASSWORD: test
           CLICKHOUSE_DB: umbrellio_utils_test
-          CLICKHOUSE_CLUSTER_NAME: click_cluster
         ports:
           - 8123:8123
           - 9000:9000
