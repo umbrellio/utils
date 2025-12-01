@@ -42,7 +42,7 @@ jobs:
         volumes:
           - ./.github/clickhouse/config.d:/etc/clickhouse-server/config.d
         options: >-
-          --health-cmd 'clickhouse-client --query "SELECT * FROM system.build_options"'
+          --health-cmd "clickhouse-client --query \"SELECT * FROM system.build_options\""
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
