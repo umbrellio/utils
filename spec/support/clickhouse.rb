@@ -5,16 +5,11 @@ require "csv"
 require "click_house"
 
 config = ClickHouse.config do |config|
-  config.assign(host: "localhost")
+  config.assign(host: "localhost", database: "umbrellio_utils_test")
   config.logger = Logger.new("log/ch.log")
 end
 
 client = ClickHouse::Connection.new(config)
-client.execute(<<~SQL)
-  CREATE DATABASE IF NOT EXISTS umbrellio_utils_test;
-SQL
-
-config.database = "umbrellio_utils_test"
 
 client.execute(<<~SQL)
   CREATE TABLE IF NOT EXISTS test (id Int32)

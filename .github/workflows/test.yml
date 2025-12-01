@@ -34,6 +34,9 @@ jobs:
       clickhouse:
         image: clickhouse/clickhouse-server:latest
         env:
+          CLICKHOUSE_USER: test
+          CLICKHOUSE_PASSWORD: test
+          CLICKHOUSE_DB: umbrellio_utils_test
           CLICKHOUSE_CLUSTER_NAME: click_cluster
         ports:
           - 8123:8123
