@@ -95,7 +95,7 @@ module UmbrellioUtils
         port = DB.opts[:port] || 5432
         database = DB.opts[:database] || ENV.fetch("USER")
         username = DB.opts[:user] || ENV.fetch("USER")
-        password = DB.opts[:password] || ENV.fetch("PASSWORD")
+        password = DB.opts[:password] || ENV.fetch("PASSWORD", "")
 
         Sequel.function(:postgresql, "#{host}:#{port}", database, table, username, password)
       end
