@@ -7,5 +7,5 @@ if defined?(Rake)
 end
 
 if defined?(RSpec)
-  Dir[File.join(__dir__, "umbrellio_utils/testing/**/*.rb")].each { |f| load f }
+  Dir[File.join(__dir__, "umbrellio_utils/testing/**/*.rb")].each { |f| require f }
 end
