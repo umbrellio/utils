@@ -6,7 +6,7 @@ module UmbrellioUtils
 
     extend self
 
-    delegate :create_database, :drop_database, :tables, :list_table_columns, :config, to: :client
+    delegate :create_database, :drop_database, :tables, :config, to: :client
 
     def insert(table_name, db_name: self.db_name, rows: [])
       client.insert(full_table_name(table_name, db_name), rows, format: "JSONEachRow")
