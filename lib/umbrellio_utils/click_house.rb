@@ -141,7 +141,7 @@ module UmbrellioUtils
     def sql_for(dataset)
       unless ch_dataset?(dataset)
         raise "Non-ClickHouse dataset: #{dataset.inspect}. " \
-                "You should use `CH.from` instead of `DB`"
+              "You should use `CH.from` instead of `DB`"
       end
 
       dataset.sql
