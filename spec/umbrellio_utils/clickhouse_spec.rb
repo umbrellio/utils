@@ -27,7 +27,7 @@ describe UmbrellioUtils::ClickHouse do
     context "with another source" do
       specify do
         expect(ch.from(ch.from(:test)).sql).to eq(
-          'SELECT * FROM (SELECT * FROM "test" ORDER BY rand()) AS "t1" ORDER BY rand()'.b,
+          'SELECT * FROM (SELECT * FROM "test") AS "t1" ORDER BY rand()'.b,
         )
       end
     end
