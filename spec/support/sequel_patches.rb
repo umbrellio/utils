@@ -1,3 +1,3 @@
 # frozen_string_literal: true
 
-require "testing/sequel_patches"
+require "umbrellio_utils/testing/sequel_patches"
