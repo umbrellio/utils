@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bash -eu
+#!/usr/bin/env bash
 
 docker stop clickhouse-server || true
 docker rm clickhouse-server || true
