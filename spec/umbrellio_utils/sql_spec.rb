@@ -47,15 +47,53 @@ describe UmbrellioUtils::SQL do
     specify { expect(result).to eq('(("test" = 123) OR ("test2" = 321))') }
   end
 
-  describe "#range" do
-    let(:expr) { sql.range(Time.zone.parse("2014-01-01"), Time.zone.parse("2015-01-01")) }
+  describe "#to_utc" do
+    let(:expr) { sql.to_utc("2020-01-01 00:00:00.000000") }
+
+    specify { expect(result).to eq("timezone('UTC', '2020-01-01 00:00:00.000000')") }
+  end
+
+  describe "#to_timezone" do
+    let(:expr) { sql.to_timezone("UTC+6", "2020-01-01 00:00:00.000000") }
+
+    specify do
+      expect(result).to eq(
+        "timezone('UTC+6', CAST(timezone('UTC', '2020-01-01 00:00:00.000000') AS timestamptz))",
+      )
+    end
+  end
+
+  describe "#pg_range" do
+    let(:expr) { sql.pg_range(Time.zone.parse("2014-01-01"), Time.zone.parse("2015-01-01")) }
 
     specify do
       expect(result).to eq("'[2014-01-01 00:00:00.000000+0000,2015-01-01 00:00:00.000000+0000]'")
     end
   end
 
-  %w[max min sum avg abs coalesce least greatest].each do |function|
+  describe "#pg_range_by_range" do
+    let(:expr) do
+      sql.pg_range_by_range(Time.zone.parse("2014-01-01")..Time.zone.parse("2015-01-01"))
+    end
+
+    specify do
+      expect(result).to eq("'[2014-01-01 00:00:00.000000+0000,2015-01-01 00:00:00.000000+0000]'")
+    end
+  end
+
+  describe "#coalesce0" do
+    let(:expr) { sql.coalesce0("test") }
+
+    specify { expect(result).to eq("coalesce('test', 0)") }
+  end
+
+  describe "#nullif" do
+    let(:expr) { sql.nullif(1, 1) }
+
+    specify { expect(result).to eq("nullif(1, 1)") }
+  end
+
+  %w[max min sum avg abs coalesce least greatest distinct jsonb_typeof row].each do |function|
     describe "##{function}" do
       let(:expr) { sql.public_send(function, :test) }
 
@@ -132,6 +170,69 @@ describe UmbrellioUtils::SQL do
       let(:expr) { sql.ch_timestamp_expr("2020-01-01") }
 
       specify { expect(result).to eq("toDateTime64('2020-01-01 00:00:00.000000', 6)") }
+    end
+  end
+
+  describe "#ch_time_range" do
+    let(:expr) { sql.ch_time_range(Time.zone.parse("2020-01-01")..Time.zone.parse("2020-01-02")) }
+
+    specify { expect(result).to eq("'[2020-01-01 00:00:00.000000,2020-01-02 00:00:00.000000]'") }
+  end
+
+  describe "#jsonb_dig" do
+    let(:expr) { sql.jsonb_dig(sql[:test].pg_jsonb, %w[test test2]) }
+
+    specify { expect(result).to eq(%("test"['test']['test2'])) }
+  end
+
+  describe "#empty_jsonb" do
+    let(:expr) { sql.empty_jsonb }
+
+    specify { expect(result).to eq("'{}'::jsonb") }
+  end
+
+  describe "#round" do
+    let(:expr) { sql.round(:test, 5) }
+
+    specify { expect(result).to eq('round("test", 5)') }
+  end
+
+  describe "#map_to_expr" do
+    let(:expr) { sql.map_to_expr({ test: Sequel[:test1], test2: Sequel[:some] }) }
+
+    specify { expect(result).to eq('("test1" AS "test", "some" AS "test2")') }
+  end
+
+  describe "#intersect" do
+    let(:expr) { sql.intersect(:test, :test2) }
+
+    specify { expect(result).to eq('SELECT "test" INTERSECT SELECT "test2"') }
+  end
+
+  describe "#jsonb_unsafe_set" do
+    let(:expr) { sql.jsonb_unsafe_set(sql[:test].pg_jsonb, %w[test test2], 123) }
+
+    specify do
+      expect(result).to eq(
+        <<~SQL.squish.gsub("( ", "(").gsub(" )", ")"),
+          jsonb_set(
+            "test", ('test'),
+            (CASE WHEN (123 IS NULL) THEN (
+                CASE WHEN (
+                  jsonb_typeof("test"['test']) IN ('object', 'array')
+                ) THEN "test"['test'] ELSE '{}'::jsonb END
+              ) ELSE jsonb_set(
+                (CASE WHEN (
+                    jsonb_typeof("test"['test']) IN ('object', 'array')
+                  ) THEN "test"['test'] ELSE '{}'::jsonb END),
+                ('test2'),
+                123,
+                true
+              ) END
+            ),
+            true)
+        SQL
+      )
     end
   end
 

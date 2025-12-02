@@ -6,8 +6,8 @@ begin
   db_name = "umbrellio_utils_test"
   DB = Sequel.postgres(
     "umbrellio_utils_test",
-    user: "user",
-    password: "pass",
+    user: "igor",
+    password: "password",
     host: "localhost",
     port: 5432,
   )
@@ -24,6 +24,8 @@ Sequel::Model.db = DB
 DB.extension :batches
 DB.extension :pg_json
 DB.extension :pg_range
+
+Sequel.extension :pg_json_ops
 
 DB.drop_table? :users, cascade: true
 DB.create_table :users do

@@ -26,6 +26,15 @@ module UmbrellioUtils
       Sequel.pg_jsonb(...)
     end
 
+    def to_utc(date)
+      func(:timezone, "UTC", date)
+    end
+
+    def to_timezone(zone, date)
+      utc_date = to_utc(date)
+      func(:timezone, zone, cast(utc_date, :timestamptz))
+    end
+
     def and(*conditions)
       Sequel.&(*Array(conditions.flatten.presence || true))
     end
@@ -38,8 +47,12 @@ module UmbrellioUtils
       Sequel.|(*Array(conditions.flatten.presence || true))
     end
 
-    def range(from_value, to_value, **opts)
+    def pg_range(from_value, to_value, **opts)
       Sequel::Postgres::PGRange.new(from_value, to_value, **opts)
+    end
+
+    def pg_range_by_range(range)
+      Sequel::Postgres::PGRange.from_range(range)
     end
 
     def max(expr)
@@ -86,6 +99,18 @@ module UmbrellioUtils
       func(:coalesce, *exprs)
     end
 
+    def coalesce0(*args)
+      coalesce(*args, 0)
+    end
+
+    def nullif(main_expr, checking_expr)
+      func(:nullif, main_expr, checking_expr)
+    end
+
+    def distinct(expr)
+      func(:distinct, expr)
+    end
+
     def least(*exprs)
       func(:least, *exprs)
     end
@@ -104,7 +129,50 @@ module UmbrellioUtils
 
     def ch_timestamp_expr(time)
       time = Time.zone.parse(time) if time.is_a?(String)
-      SQL.func(:toDateTime64, SQL[ch_timestamp(time)], 6)
+      func(:toDateTime64, Sequel[ch_timestamp(time)], 6)
+    end
+
+    def ch_time_range(range)
+      Range.new(ch_timestamp(range.begin), ch_timestamp(range.end), range.exclude_end?)
+    end
+
+    def jsonb_dig(jsonb, path)
+      path.reduce(jsonb) { |acc, cur| acc[cur] }
+    end
+
+    def jsonb_typeof(jsonb)
+      func(:jsonb_typeof, jsonb)
+    end
+
+    def empty_jsonb
+      Sequel.pg_jsonb({})
+    end
+
+    def round(value, precision = 0)
+      func(:round, value, precision)
+    end
+
+    def row(*values)
+      func(:row, *values)
+    end
+
+    def map_to_expr(hash)
+      hash.map { |aliaz, expr| expr.as(aliaz) }
+    end
+
+    def intersect(left_expr, right_expr)
+      Sequel.lit("SELECT ? INTERSECT SELECT ?", left_expr, right_expr)
+    end
+
+    # can rewrite scalar values
+    def jsonb_unsafe_set(jsonb, path, value)
+      parent_path = path.slice(..-2)
+      raw_parent = jsonb_dig(jsonb, parent_path)
+      parent = jsonb_rewrite_scalar(raw_parent)
+      last_path = path.slice(-1..-1)
+      updated_parent = parent.set(last_path, value)
+      result = self.case({ { value => nil } => parent }, updated_parent)
+      jsonb.set(parent_path, result)
     end
 
     def true
@@ -113,6 +181,12 @@ module UmbrellioUtils
 
     def false
       Sequel.lit("false")
+    end
+
+    private
+
+    def jsonb_rewrite_scalar(jsonb)
+      self.case({ { jsonb_typeof(jsonb) => %w[object array] } => jsonb }, empty_jsonb).pg_jsonb
     end
   end
 end
