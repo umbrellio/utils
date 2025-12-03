@@ -83,13 +83,30 @@ describe UmbrellioUtils::ClickHouse do
   end
 
   describe "#with_temp_table" do
-    specify do
-      result = []
-      dataset = ch.from(:test).order(:id)
-      ch.with_temp_table(dataset, temp_table_name: "some_test_table", page_size: 1) do |batch|
-        result << batch
+    let(:result) { [] }
+    let(:dataset) { ch.from(:test).order(:id) }
+
+    context "when no temp table" do
+      before { DB.drop_table?(:some_test_table) }
+
+      specify do
+        ch.with_temp_table(dataset, temp_table_name: "some_test_table", page_size: 1) do |batch|
+          result << batch
+        end
+        expect(result).to eq([[3], [2], [1]])
       end
-      expect(result).to eq([[3], [2], [1]])
+    end
+
+    context "when table already exist" do
+      before { DB.create_table("some_test_table") { primary_key :id } }
+      before { DB[:some_test_table].multi_insert([{ id: 4 }, { id: 5 }, { id: 6 }]) }
+
+      it "takes from existing" do
+        ch.with_temp_table(dataset, temp_table_name: "some_test_table", page_size: 1) do |batch|
+          result << batch
+        end
+        expect(result).to eq([[6], [5], [4]])
+      end
     end
   end
 
