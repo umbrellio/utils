@@ -4,7 +4,13 @@ require "logger"
 
 begin
   db_name = "umbrellio_utils_test"
-  DB = Sequel.connect(ENV.fetch("DB_URL", "postgres:///#{db_name}"))
+  DB = Sequel.postgres(
+    "umbrellio_utils_test",
+    user: ENV.fetch("PGUSER"),
+    password: ENV.fetch("PGPASSWORD"),
+    host: "localhost",
+    port: 5432,
+  )
 rescue Sequel::DatabaseConnectionError => error
   puts error
   abort "You probably need to create a test database. " \
@@ -16,6 +22,10 @@ DB.logger = Logger.new("log/db.log")
 Sequel::Model.db = DB
 
 DB.extension :batches
+DB.extension :pg_json
+DB.extension :pg_range
+
+Sequel.extension :pg_json_ops
 
 DB.drop_table? :users, cascade: true
 DB.create_table :users do
@@ -43,6 +53,18 @@ DB.create_table :user_tokens do
   foreign_key :user_id, :users
 end
 
+DB.drop_table? :test_migrations, cascade: true
+DB.create_table :test_migrations do
+  primary_key :id
+  column :test, :text
+end
+
+DB.drop_table? :test_migration_references
+DB.create_table :test_migration_references do
+  primary_key :id
+  foreign_key :test_migration_id, :test_migrations
+end
+
 class User < Sequel::Model(:users)
   def skip_table_sync?
     false
@@ -67,4 +89,13 @@ class UserToken < Sequel::Model(:user_tokens)
   def skip_table_sync?
     false
   end
+end
+
+class TestMigration < Sequel::Model(:test_migrations)
+  one_to_many :test_migration_references,
+              class_name: "TestMigrationReference", key: :test_migration_id, primary_key: :id
+end
+
+class TestMigrationReference < Sequel::Model(:test_migration_references)
+  many_to_one :test_migration, class_name: "TestMigration", key: :test_migration_id
 end

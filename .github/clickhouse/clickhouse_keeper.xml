@@ -1,0 +1,42 @@
+<yandex>
+  <remote_servers>
+    <click_cluster>
+      <shard>
+        <internal_replication>true</internal_replication>
+        <replica>
+          <host>localhost</host>
+          <port>9000</port>
+        </replica>
+      </shard>
+    </click_cluster>
+  </remote_servers>
+
+  <keeper_server>
+    <tcp_port>9181</tcp_port>
+    <tcp_port_secure>0</tcp_port_secure>
+    <server_id>1</server_id>
+    <log_storage_path>/var/lib/clickhouse/coordination/log</log_storage_path>
+    <snapshot_storage_path>/var/lib/clickhouse/coordination/snapshots</snapshot_storage_path>
+
+    <coordination_settings>
+      <operation_timeout_ms>10000</operation_timeout_ms>
+      <session_timeout_ms>30000</session_timeout_ms>
+      <raft_logs_level>trace</raft_logs_level>
+    </coordination_settings>
+
+    <raft_configuration>
+      <server>
+        <id>1</id>
+        <hostname>localhost</hostname>
+        <port>9234</port>
+      </server>
+    </raft_configuration>
+  </keeper_server>
+
+  <zookeeper>
+    <node>
+      <host>localhost</host>
+      <port>9181</port>
+    </node>
+  </zookeeper>
+</yandex>
