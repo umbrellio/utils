@@ -7,6 +7,7 @@ describe UmbrellioUtils do
 
   it "sets proper default configuration" do
     expect(described_class.config.to_h).to eq(
+      ch_optimize_timeout: 5.minutes,
       store_table_name: :store,
       http_client_name: :application_httpclient,
     )
