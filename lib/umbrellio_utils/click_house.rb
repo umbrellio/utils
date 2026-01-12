@@ -53,7 +53,7 @@ module UmbrellioUtils
     end
 
     def optimize_table!(table_name, db_name: self.db_name)
-      Timeout.timeout(5.minutes) do
+      Timeout.timeout(UmbrellioUtils.config.ch_optimize_timeout) do
         execute("OPTIMIZE TABLE #{db_name}.#{table_name} ON CLUSTER click_cluster FINAL")
       end
     end

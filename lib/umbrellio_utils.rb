@@ -16,7 +16,7 @@ module UmbrellioUtils
   def config
     synchronize do
       @@config ||= Struct
-        .new(:store_table_name, :http_client_name, keyword_init: true)
+        .new(:store_table_name, :http_client_name, :ch_optimize_timeout, keyword_init: true)
         .new(**default_settings)
     end
   end
@@ -38,6 +38,7 @@ module UmbrellioUtils
     {
       store_table_name: :store,
       http_client_name: :application_httpclient,
+      ch_optimize_timeout: 5.minutes,
     }
   end
 
