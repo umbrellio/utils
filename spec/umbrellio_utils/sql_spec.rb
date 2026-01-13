@@ -93,6 +93,18 @@ describe UmbrellioUtils::SQL do
     specify { expect(result).to eq("nullif(1, 1)") }
   end
 
+  describe "#max_or_null" do
+    let(:expr) { sql.max_or_null(1) }
+
+    specify { expect(result).to eq("maxOrNull(1)") }
+  end
+
+  describe "#min_or_null" do
+    let(:expr) { sql.min_or_null(1) }
+
+    specify { expect(result).to eq("minOrNull(1)") }
+  end
+
   %w[max min sum avg abs coalesce least greatest distinct jsonb_typeof row].each do |function|
     describe "##{function}" do
       let(:expr) { sql.public_send(function, :test) }
