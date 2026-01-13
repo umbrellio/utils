@@ -59,8 +59,16 @@ module UmbrellioUtils
       func(:max, expr)
     end
 
+    def max_or_null(expr)
+      func(:maxOrNull, expr)
+    end
+
     def min(expr)
       func(:min, expr)
+    end
+
+    def min_or_null(expr)
+      func(:minOrNull, expr)
     end
 
     def sum(expr)
