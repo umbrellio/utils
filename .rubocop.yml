@@ -32,13 +32,8 @@ Naming/VariableNumber:
 Naming/PredicateMethod:
   Enabled: false
 
+require:
+  - ./lib/rubocop/cop/custom/regex_rules.rb
+
 Custom/RegexRules:
   Enabled: true
-  Rules:
-    - name: Migrations/ProcessorsDirectDBAccess
-      regex: 'DB\s*\[\s*:processors\s*\]'
-      message: >
-        Direct access to DB[:processors] is forbidden.
-        Use Processor model and AfterDeploy job instead.
-      paths:
-        - db/migrate/**/*.rb
