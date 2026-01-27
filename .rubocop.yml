@@ -33,7 +33,7 @@ Naming/PredicateMethod:
   Enabled: false
 
 require:
-  - ./lib/rubocop/cop/custom/regex_rules.rb
+  - umbrellio_utils/rubocop
 
 Custom/RegexRules:
   Enabled: true
