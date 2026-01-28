@@ -39,7 +39,7 @@ module RuboCop
           # Then check inclusions
           return true unless rule["paths"] # no restriction
 
-          rule["paths"].any? { |pattern| File.fnmatch?(pattern, path) }
+          rule["paths"].any? { |pattern| File.fnmatch?(pattern, path, File::FNM_PATHNAME) }
         end
 
         def range_for_match(lineno, match)
