@@ -10,7 +10,7 @@ GIT
 PATH
   remote: .
   specs:
-    umbrellio-utils (1.10.2)
+    umbrellio-utils (1.11.0)
       memery (~> 1)
 
 GEM
