@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "memery", "~> 1"
+  spec.add_dependency "rubocop", ">= 1.0"
 end

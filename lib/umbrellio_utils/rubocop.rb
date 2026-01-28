@@ -1,4 +1,4 @@
 # frozen_string_literal: true
 
-require "rubocop"
-require_relative "../rubocop/cop/custom/regex_rules"
+require "rubocop" # удалить мб?
+require "umbrellio_utils/rubocop/cop/custom/regex_rules"
