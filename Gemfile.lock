@@ -10,8 +10,9 @@ GIT
 PATH
   remote: .
   specs:
-    umbrellio-utils (1.10.2)
+    umbrellio-utils (1.10.3)
       memery (~> 1)
+      rubocop (>= 1.0)
 
 GEM
   remote: https://rubygems.org/
