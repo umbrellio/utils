@@ -31,9 +31,3 @@ Naming/VariableNumber:
 
 Naming/PredicateMethod:
   Enabled: false
-#
-#require:
-#  - umbrellio_utils/rubocop
-#
-#Custom/RegexRules:
-#  Enabled: true
