@@ -12,7 +12,6 @@ PATH
   specs:
     umbrellio-utils (1.11.0)
       memery (~> 1)
-      rubocop (>= 1.0)
 
 GEM
   remote: https://rubygems.org/
