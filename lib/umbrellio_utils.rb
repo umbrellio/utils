@@ -63,7 +63,7 @@ require_relative "umbrellio_utils/passwords"
 require_relative "umbrellio_utils/random"
 require_relative "umbrellio_utils/request_wrapper"
 require_relative "umbrellio_utils/rounding"
-require_relative "umbrellio_utils/sql" if defined?(::Sequel)
+require_relative "umbrellio_utils/sql" if defined?(Sequel)
 require_relative "umbrellio_utils/semantic_logger/tiny_json_formatter"
 require_relative "umbrellio_utils/store"
 require_relative "umbrellio_utils/vault"
