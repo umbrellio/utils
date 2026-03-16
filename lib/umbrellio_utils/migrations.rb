@@ -227,7 +227,6 @@ module UmbrellioUtils
       end
 
       DB.transaction do
-        DB.run("LOCK TABLE #{view_name}")
         definition = view_definition(view_name)
         sql = sequel_columns.map { |x| DB.literal(x) }.join(", ")
         new_definition = definition.sub("FROM", ", #{sql} FROM")
@@ -239,7 +238,6 @@ module UmbrellioUtils
     # drop_columns_from_view("orders_clickhouse_view", "id", "guid")
     def drop_columns_from_view(view_name, *columns)
       DB.transaction do
-        DB.run("LOCK TABLE #{view_name}")
         definition = view_definition(view_name)
         parsed_columns = parse_columns(definition)
         parsed_columns.reject! { |name, _| name.in?(columns) }
