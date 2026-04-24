@@ -16,7 +16,14 @@ module UmbrellioUtils
   def config
     synchronize do
       @@config ||= Struct
-        .new(:store_table_name, :http_client_name, :ch_optimize_timeout, keyword_init: true)
+        .new(
+          :store_table_name,
+          :http_client_name,
+          :ch_optimize_timeout,
+          :clickhouse_backend,
+          :clickhouse_native_settings,
+          keyword_init: true,
+        )
         .new(**default_settings)
     end
   end
@@ -25,6 +32,10 @@ module UmbrellioUtils
 
   def configure
     synchronize { yield config }
+    # Consumers on the native backend rely on `::ClickHouse.config`
+    # being available at rake/runtime (e.g. umbrellio-sequel-plugins'
+    # ch:create). Load the shim eagerly once the backend is selected.
+    require_relative "umbrellio_utils/click_house/config" if config.clickhouse_backend == :native
   end
 
   def extend_util!(module_name, &block)
@@ -39,6 +50,8 @@ module UmbrellioUtils
       store_table_name: :store,
       http_client_name: :application_httpclient,
       ch_optimize_timeout: 5.minutes,
+      clickhouse_backend: :legacy,
+      clickhouse_native_settings: {},
     }
   end
 
