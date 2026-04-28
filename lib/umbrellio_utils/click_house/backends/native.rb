@@ -70,7 +70,9 @@ module UmbrellioUtils
         end
 
         def logger
-          @logger ||= (defined?(Rails) && Rails.logger) || Logger.new($stdout)
+          @logger ||= UmbrellioUtils.config.clickhouse_native_logger ||
+                      (defined?(Rails) && Rails.logger) ||
+                      Logger.new($stdout)
         end
 
         def pool

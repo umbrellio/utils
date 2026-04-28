@@ -22,6 +22,7 @@ module UmbrellioUtils
           :ch_optimize_timeout,
           :clickhouse_backend,
           :clickhouse_native_settings,
+          :clickhouse_native_logger,
           keyword_init: true,
         )
         .new(**default_settings)

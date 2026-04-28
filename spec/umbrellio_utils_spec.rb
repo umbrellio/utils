@@ -12,6 +12,7 @@ describe UmbrellioUtils do
       http_client_name: :application_httpclient,
       clickhouse_backend: :legacy,
       clickhouse_native_settings: {},
+      clickhouse_native_logger: nil,
     )
   end
 
