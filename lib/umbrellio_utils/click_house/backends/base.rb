@@ -61,17 +61,31 @@ module UmbrellioUtils
           )
         end
 
+        # Returns the `ON CLUSTER <name> [SYNC]` clause for DDL, or "" if
+        # `UmbrellioUtils.config.clickhouse_cluster` is blank or we're in
+        # a Rails test env. Test-env suppression saves hundreds of ms per
+        # DDL on a single-node CH (each ON CLUSTER op blocks waiting for
+        # replicas that don't exist). The cluster *name* is still used
+        # by callers like Distributed engine declarations, regardless of
+        # this clause.
+        def on_cluster(sync: false)
+          name = UmbrellioUtils.config.clickhouse_cluster
+          return "" if name.blank?
+          return "" if defined?(Rails) && Rails.env.test?
+          sync ? "ON CLUSTER #{name} SYNC" : "ON CLUSTER #{name}"
+        end
+
         def truncate_table!(table_name, db_name: self.db_name)
-          execute("TRUNCATE TABLE #{db_name}.#{table_name} ON CLUSTER click_cluster SYNC")
+          execute("TRUNCATE TABLE #{db_name}.#{table_name} #{on_cluster(sync: true)}")
         end
 
         def drop_table!(table_name, db_name: self.db_name)
-          execute("DROP TABLE #{db_name}.#{table_name} ON CLUSTER click_cluster SYNC")
+          execute("DROP TABLE #{db_name}.#{table_name} #{on_cluster(sync: true)}")
         end
 
         def optimize_table!(table_name, db_name: self.db_name)
           Timeout.timeout(UmbrellioUtils.config.ch_optimize_timeout) do
-            execute("OPTIMIZE TABLE #{db_name}.#{table_name} ON CLUSTER click_cluster FINAL")
+            execute("OPTIMIZE TABLE #{db_name}.#{table_name} #{on_cluster} FINAL")
           end
         end
 

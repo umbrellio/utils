@@ -17,7 +17,7 @@ module UmbrellioUtils
       execute query query_value query_each count insert
       from describe_table server_version tables
       create_database drop_database db_name config
-      truncate_table! drop_table! optimize_table!
+      truncate_table! drop_table! optimize_table! on_cluster
       parse_value pg_table_connection populate_temp_table! with_temp_table
     ].freeze
 

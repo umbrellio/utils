@@ -23,6 +23,7 @@ module UmbrellioUtils
           :clickhouse_backend,
           :clickhouse_native_settings,
           :clickhouse_native_logger,
+          :clickhouse_cluster,
           keyword_init: true,
         )
         .new(**default_settings)
@@ -53,6 +54,7 @@ module UmbrellioUtils
       ch_optimize_timeout: 5.minutes,
       clickhouse_backend: :legacy,
       clickhouse_native_settings: {},
+      clickhouse_cluster: "click_cluster",
     }
   end
 
