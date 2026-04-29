@@ -6,8 +6,8 @@ begin
   db_name = "umbrellio_utils_test"
   DB = Sequel.postgres(
     "umbrellio_utils_test",
-    user: ENV.fetch("PGUSER"),
-    password: ENV.fetch("PGPASSWORD"),
+    user: ENV.fetch("PGUSER", Etc.getlogin),
+    password: ENV.fetch("PGPASSWORD", ""),
     host: "localhost",
     port: 5432,
   )

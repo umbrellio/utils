@@ -9,6 +9,7 @@ docker run \
   --network host \
   --name clickhouse-server \
   --ulimit nofile=262144:262144 \
+  -e CLICKHOUSE_DB=umbrellio_utils_test \
   $CLICKHOUSE_IMAGE_TAG
 
 # Wait for ClickHouse server to become available
@@ -16,5 +17,3 @@ until docker exec clickhouse-server clickhouse-client --query "SELECT 1" &>/dev/
   echo "Waiting for ClickHouse to be ready..."
   sleep 1
 done
-
-rails ch:create ch:migrate

@@ -44,7 +44,7 @@ describe UmbrellioUtils::Misc do
         },
         event: :table_sync,
         exchange_name: nil,
-        headers: {},
+        headers: { compress: false },
         realtime: true,
         routing_key: :umbrellio_utils,
       }
