@@ -27,8 +27,8 @@ module UmbrellioUtils
           log_errors(sql) { select_value(sql, host:, **opts) }
         end
 
-        def query_each(dataset, host: nil, **opts, &)
-          query(dataset, host:, **opts).each(&)
+        def query_each(dataset, host: nil, **, &)
+          query(dataset, host:, **).each(&)
         end
 
         def insert(table_name, db_name: self.db_name, rows: [])

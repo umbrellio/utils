@@ -6,8 +6,8 @@ module UmbrellioUtils
 
     UniqueConstraintViolation = Sequel::UniqueConstraintViolation
 
-    def [](*args)
-      Sequel[*args]
+    def [](*)
+      Sequel[*]
     end
 
     def func(...)
@@ -47,8 +47,8 @@ module UmbrellioUtils
       Sequel.|(*Array(conditions.flatten.presence || true))
     end
 
-    def pg_range(from_value, to_value, **opts)
-      Sequel::Postgres::PGRange.new(from_value, to_value, **opts)
+    def pg_range(from_value, to_value, **)
+      Sequel::Postgres::PGRange.new(from_value, to_value, **)
     end
 
     def pg_range_by_range(range)
@@ -79,8 +79,8 @@ module UmbrellioUtils
       expr ? func(:count, expr) : func(:count).*
     end
 
-    def ch_count(*args)
-      Sequel.function(:count, *args)
+    def ch_count(*)
+      Sequel.function(:count, *)
     end
 
     def avg(expr)
@@ -107,8 +107,8 @@ module UmbrellioUtils
       func(:coalesce, *exprs)
     end
 
-    def coalesce0(*args)
-      coalesce(*args, 0)
+    def coalesce0(*)
+      coalesce(*, 0)
     end
 
     def nullif(main_expr, checking_expr)

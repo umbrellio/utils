@@ -11,8 +11,7 @@ begin
     host: "localhost",
     port: 5432,
   )
-rescue Sequel::DatabaseConnectionError => error
-  puts error
+rescue Sequel::DatabaseConnectionError
   abort "You probably need to create a test database. " \
         "Try running the following command: `createdb #{db_name}`"
 end

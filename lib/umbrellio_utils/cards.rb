@@ -4,10 +4,11 @@ module UmbrellioUtils
   module Cards
     extend self
 
-    InvalidExpiryDateString = Class.new(StandardError)
+    class InvalidExpiryDateString < StandardError
+    end
 
-    def parse_expiry_date!(string, **options)
-      result = parse_expiry_date(string, **options)
+    def parse_expiry_date!(string, **)
+      result = parse_expiry_date(string, **)
 
       unless result
         raise InvalidExpiryDateString, "Failed to parse expiry date: #{string.inspect}"

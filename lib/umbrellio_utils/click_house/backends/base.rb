@@ -122,7 +122,7 @@ module UmbrellioUtils
         end
 
         def with_temp_table(
-          dataset, temp_table_name:, primary_key: [:id], primary_key_types: [:integer], **opts, &
+          dataset, temp_table_name:, primary_key: [:id], primary_key_types: [:integer], **, &
         )
           unless DB.table_exists?(temp_table_name)
             UmbrellioUtils::Database.create_temp_table(
@@ -130,7 +130,7 @@ module UmbrellioUtils
             )
             populate_temp_table!(temp_table_name, dataset)
           end
-          UmbrellioUtils::Database.with_temp_table(nil, primary_key:, temp_table_name:, **opts, &)
+          UmbrellioUtils::Database.with_temp_table(nil, primary_key:, temp_table_name:, **, &)
         end
 
         protected

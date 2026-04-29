@@ -45,8 +45,8 @@ module UmbrellioUtils
       end
     end
 
-    def run_non_critical(rescue_all: false, in_transaction: false, &block)
-      in_transaction ? DB.transaction(savepoint: true, &block) : yield
+    def run_non_critical(rescue_all: false, in_transaction: false, &)
+      in_transaction ? DB.transaction(savepoint: true, &) : yield
     rescue (rescue_all ? Exception : StandardError) => e
       Exceptions.notify!(e)
       nil
