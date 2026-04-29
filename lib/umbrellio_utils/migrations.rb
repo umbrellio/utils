@@ -200,16 +200,19 @@ module UmbrellioUtils
     end
 
     def create_distributed_table!(table_name, sharding_key, db_name: UmbrellioUtils::ClickHouse.db_name)
+      cluster = UmbrellioUtils.config.clickhouse_cluster
+      on_cluster = UmbrellioUtils::ClickHouse.on_cluster
+
       UmbrellioUtils::ClickHouse.execute(<<~SQL.squish)
         DROP TABLE IF EXISTS #{db_name}.#{table_name}_distributed
-        ON CLUSTER click_cluster
+        #{on_cluster}
       SQL
 
       UmbrellioUtils::ClickHouse.execute(<<~SQL.squish)
         CREATE TABLE #{db_name}.#{table_name}_distributed
-        ON CLUSTER click_cluster
+        #{on_cluster}
         AS #{db_name}.#{table_name}
-        ENGINE = Distributed(click_cluster, #{db_name}, #{table_name}, #{sharding_key})
+        ENGINE = Distributed(#{cluster}, #{db_name}, #{table_name}, #{sharding_key})
       SQL
     end
 

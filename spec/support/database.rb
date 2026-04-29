@@ -6,14 +6,13 @@ begin
   db_name = "umbrellio_utils_test"
   DB = Sequel.postgres(
     "umbrellio_utils_test",
-    user: ENV.fetch("PGUSER"),
-    password: ENV.fetch("PGPASSWORD"),
+    user: ENV.fetch("PGUSER", Etc.getlogin),
+    password: ENV.fetch("PGPASSWORD", ""),
     host: "localhost",
     port: 5432,
   )
 rescue Sequel::DatabaseConnectionError => error
-  puts error
-  abort "You probably need to create a test database. " \
+  abort "You probably need to create a test database. Error: #{error.inspect}. " \
         "Try running the following command: `createdb #{db_name}`"
 end
 

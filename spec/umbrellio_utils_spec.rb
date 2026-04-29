@@ -10,6 +10,10 @@ describe UmbrellioUtils do
       ch_optimize_timeout: 5.minutes,
       store_table_name: :store,
       http_client_name: :application_httpclient,
+      clickhouse_backend: :legacy,
+      clickhouse_native_settings: {},
+      clickhouse_native_logger: nil,
+      clickhouse_cluster: "click_cluster",
     )
   end
 

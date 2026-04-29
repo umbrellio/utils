@@ -3,12 +3,13 @@
 namespace :ch do
   desc "run clickhouse client"
   task connect: :environment do
+    cfg = UmbrellioUtils::ClickHouse.config
     params = {
-      host: ENV.fetch("CLICKHOUSE_HOST", UmbrellioUtils::ClickHouse.config.host),
-      user: ENV.fetch("CLICKHOUSE_USER", UmbrellioUtils::ClickHouse.config.username),
-      password: ENV.fetch("CLICKHOUSE_PASSWORD", UmbrellioUtils::ClickHouse.config.password),
-      database: ENV.fetch("CLICKHOUSE_DATABASE", UmbrellioUtils::ClickHouse.config.database),
-      **UmbrellioUtils::ClickHouse.config.global_params,
+      host: ENV.fetch("CLICKHOUSE_HOST", cfg.host),
+      user: ENV.fetch("CLICKHOUSE_USER", cfg.username),
+      password: ENV.fetch("CLICKHOUSE_PASSWORD", cfg.password),
+      database: ENV.fetch("CLICKHOUSE_DATABASE", cfg.database),
+      **(cfg.try(:global_params) || {}),
     }.compact_blank
 
     cmd = Shellwords.join(["clickhouse", "client", *params.map { |k, v| "--#{k}=#{v}" }])

@@ -4,8 +4,11 @@ module UmbrellioUtils
   module Database
     extend self
 
-    HandledConstaintError = Class.new(StandardError)
-    InvalidPkError = Class.new(StandardError)
+    class HandledConstaintError < StandardError
+    end
+
+    class InvalidPkError < StandardError
+    end
 
     def handle_constraint_error(constraint_name, &)
       DB.transaction(savepoint: true, &)

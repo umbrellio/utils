@@ -58,13 +58,13 @@ describe UmbrellioUtils::ClickHouse do
     specify do
       expect(ch.describe_table("test")).to eq(
         [
-          codec_expression: "",
-          comment: "",
-          default_expression: "",
-          default_type: "",
-          name: "id",
-          ttl_expression: "",
-          type: "Int32",
+          { codec_expression: "",
+            comment: "",
+            default_expression: "",
+            default_type: "",
+            name: "id",
+            ttl_expression: "",
+            type: "Int32" },
         ],
       )
     end
