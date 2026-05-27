@@ -23,24 +23,24 @@ module UmbrellioUtils
         UNKNOWN_TABLE = 60
         UNKNOWN_DATABASE = 81
 
-        def execute(sql, host: nil, **_opts) # rubocop:disable Lint/UnusedMethodArgument
+        def execute(sql, host: nil, **opts) # rubocop:disable Lint/UnusedMethodArgument
           sql_string = sql.is_a?(String) ? sql : sql.sql
-          log_errors(sql_string) { pool.execute(sql_string) }
+          log_errors(sql_string) { pool.execute(sql_string, settings: opts) }
         end
 
-        def query(dataset, host: nil, **_opts) # rubocop:disable Lint/UnusedMethodArgument
+        def query(dataset, host: nil, **opts) # rubocop:disable Lint/UnusedMethodArgument
           sql = sql_for(dataset)
-          log_errors(sql) { pool.query(sql) }
+          log_errors(sql) { pool.query(sql, settings: opts) }
         end
 
-        def query_value(dataset, host: nil, **_opts) # rubocop:disable Lint/UnusedMethodArgument
+        def query_value(dataset, host: nil, **opts) # rubocop:disable Lint/UnusedMethodArgument
           sql = sql_for(dataset)
-          log_errors(sql) { pool.query_value(sql) }
+          log_errors(sql) { pool.query_value(sql, settings: opts) }
         end
 
-        def query_each(dataset, host: nil, **_opts, &) # rubocop:disable Lint/UnusedMethodArgument
+        def query_each(dataset, host: nil, **opts, &) # rubocop:disable Lint/UnusedMethodArgument
           sql = sql_for(dataset)
-          log_errors(sql) { pool.query_each(sql, &) }
+          log_errors(sql) { pool.query_each(sql, settings: opts, &) }
         end
 
         def insert(table_name, db_name: self.db_name, rows: [])
