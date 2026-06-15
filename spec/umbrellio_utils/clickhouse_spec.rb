@@ -31,6 +31,28 @@ describe UmbrellioUtils::ClickHouse do
         )
       end
     end
+
+    context "string literal escaping" do
+      # ClickHouse uses C-style escape sequences; backslash must be doubled.
+      # Ruby "foo\\bar" == the string foo\bar (one backslash).
+      # Expected SQL: 'foo\\bar' (two chars \\ so CH sees one literal \).
+      it "doubles backslashes so ClickHouse C-style escaping is safe" do
+        ds = ch.from(:test).where(Sequel[:name] => "foo\\bar")
+        expect(ds.sql).to include("'foo\\\\bar'")
+      end
+
+      it "escapes single quotes" do
+        ds = ch.from(:test).where(Sequel[:name] => "foo'bar")
+        expect(ds.sql).to include("'foo''bar'")
+      end
+
+      # Input: foo\'bar  (backslash then quote)
+      # Expected SQL: 'foo\\''bar'  (\\ for the backslash, '' for the quote)
+      it "handles backslash immediately before single quote" do
+        ds = ch.from(:test).where(Sequel[:name] => "foo\\'bar")
+        expect(ds.sql).to include("'foo\\\\''bar'")
+      end
+    end
   end
 
   describe "#query" do
