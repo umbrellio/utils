@@ -13,6 +13,15 @@ module UmbrellioUtils
       class Base
         include Singleton
 
+        # ClickHouse uses C-style escape sequences in string literals, so
+        # backslashes must be doubled. Sequel's default (Postgres) escaping
+        # only escapes single-quotes.
+        module ClickHouseStringEscaping
+          def literal_string_append(sql, v)
+            sql << "'" << v.gsub("\\") { "\\\\" }.gsub("'", "''") << "'"
+          end
+        end
+
         # Concrete backends implement the low-level ops (execute / query /
         # insert / describe_table / server_version / tables / admin_execute
         # / config / logger) and define SERVER_ERROR.
@@ -27,7 +36,7 @@ module UmbrellioUtils
             else
               DB.from(source)
             end
-          ds.clone(ch: true)
+          ds.clone(ch: true).with_extend(ClickHouseStringEscaping)
         end
 
         def count(dataset)
