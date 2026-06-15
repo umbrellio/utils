@@ -17,8 +17,8 @@ module UmbrellioUtils
         # backslashes must be doubled. Sequel's default (Postgres) escaping
         # only escapes single-quotes.
         module ClickHouseStringEscaping
-          def literal_string_append(sql, v)
-            sql << "'" << v.gsub("\\") { "\\\\" }.gsub("'", "''") << "'"
+          def literal_string_append(sql, str)
+            sql << "'" << str.gsub("\\") { "\\\\" }.gsub("'", "''") << "'"
           end
         end
 
