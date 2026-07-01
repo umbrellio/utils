@@ -28,13 +28,14 @@ module UmbrellioUtils
     def each_record(dataset, primary_key: nil, **options, &block)
       primary_key = primary_key_from(dataset, primary_key:)
       eager_tables = Array(options.delete(:eager_load))
+      order = options.fetch(:order, :desc)
 
       with_temp_table(dataset, primary_key:, **options) do |ids|
         rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
-        records = dataset.model
-               .eager(eager_tables)
-               .where(row(primary_key) => rows)
-               .reverse(row(primary_key)).all
+        records = ordered(
+          dataset.model.eager(eager_tables).where(row(primary_key) => rows),
+          row(primary_key), order
+        ).all
         records.each(&block)
       end
     end
@@ -48,6 +49,7 @@ module UmbrellioUtils
     # @option [Array] primary_key custom primary key to use for dataset
     # @option [Symbol, String] temp_table_name custom name for temporary table,
     #   table is reused if already exists
+    # @option [Symbol] order primary key order to yield batches in, :asc or :desc
     # rubocop:disable Metrics/ParameterLists
     def with_temp_table(
       dataset,
@@ -55,7 +57,8 @@ module UmbrellioUtils
       sleep: nil,
       primary_key: nil,
       temp_table_name: nil,
-      transaction: true
+      transaction: true,
+      order: :desc
     )
       primary_key = primary_key_from(dataset, primary_key:)
       sleep_interval = sleep_interval_from(sleep)
@@ -68,7 +71,7 @@ module UmbrellioUtils
 
       loop do
         conditional_transaction(transaction) do
-          pk_set = pop_next_pk_batch(temp_table_name, primary_key, page_size)
+          pk_set = pop_next_pk_batch(temp_table_name, primary_key, page_size, order)
           yield(pk_set) if pk_set.any?
         end
 
@@ -122,6 +125,14 @@ module UmbrellioUtils
       Sequel.function(:row, *values)
     end
 
+    def ordered(dataset, expr, order)
+      case order
+      when :asc then dataset.order(expr)
+      when :desc then dataset.reverse(expr)
+      else raise ArgumentError, "invalid order: #{order.inspect} (expected :asc or :desc)"
+      end
+    end
+
     def extract_primary_key(dataset)
       dataset.db.schema(dataset.first_source).select { |x| x[1][:primary_key] }.map(&:first)
     end
@@ -147,9 +158,9 @@ module UmbrellioUtils
       end
     end
 
-    def pop_next_pk_batch(temp_table_name, primary_key, batch_size)
+    def pop_next_pk_batch(temp_table_name, primary_key, batch_size, order)
       row = row(primary_key)
-      pk_expr = DB[temp_table_name].select(*primary_key).reverse(row).limit(batch_size)
+      pk_expr = ordered(DB[temp_table_name].select(*primary_key), row, order).limit(batch_size)
       deleted_items = DB[temp_table_name].where(row => pk_expr).returning.delete
       deleted_items.map do |item|
         next item if primary_key.size > 1

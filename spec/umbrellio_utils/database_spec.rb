@@ -177,6 +177,23 @@ describe UmbrellioUtils::Database, :db do
       end
     end
 
+    context "with order: :asc" do
+      let(:options) { Hash[order: :asc] }
+
+      it "yields each record in ascending order" do
+        expect(result_emails).to eq(users_data.pluck(:email))
+        expect(sleep_calls).to eq([])
+      end
+    end
+
+    context "with invalid order option" do
+      let(:options) { Hash[order: :invalid] }
+
+      it "raises ArgumentError" do
+        expect { result_emails }.to raise_error(ArgumentError, /invalid order/)
+      end
+    end
+
     context "with eager_load" do
       let(:options) { Hash[eager_load: [:user]] }
 
