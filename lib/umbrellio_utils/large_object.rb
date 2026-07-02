@@ -33,7 +33,7 @@ module UmbrellioUtils
 
     def append!(str)
       run(:lo_put, oid, str_offset, Sequel.blob(str))
-      self.str_offset += str.length
+      self.str_offset += str.bytesize
     end
 
     def read(*)
@@ -41,7 +41,9 @@ module UmbrellioUtils
     end
 
     def delete!
-      run(:lo_unlink, oid) if exists?
+      run(:lo_unlink, oid)
+    rescue PG::UndefinedObject
+      # Ignored
     end
 
     def exists?

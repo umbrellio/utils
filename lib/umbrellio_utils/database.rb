@@ -2,6 +2,8 @@
 
 module UmbrellioUtils
   module Database
+    DEFAULT_ORDER = :desc
+
     extend self
 
     class HandledConstaintError < StandardError
@@ -28,7 +30,7 @@ module UmbrellioUtils
     def each_record(dataset, primary_key: nil, **options, &block)
       primary_key = primary_key_from(dataset, primary_key:)
       eager_tables = Array(options.delete(:eager_load))
-      order = options.fetch(:order, :desc)
+      order = options.fetch(:order, DEFAULT_ORDER)
 
       with_temp_table(dataset, primary_key:, **options) do |ids|
         rows = ids.map { |id| row(id.is_a?(Hash) ? id.values : [id]) }
@@ -58,8 +60,11 @@ module UmbrellioUtils
       primary_key: nil,
       temp_table_name: nil,
       transaction: true,
-      order: :desc
+      order: DEFAULT_ORDER
     )
+      raise ArgumentError, "invalid order: #{order.inspect} (expected :asc or :desc)" \
+        unless %i[asc desc].include?(order)
+
       primary_key = primary_key_from(dataset, primary_key:)
       sleep_interval = sleep_interval_from(sleep)
 

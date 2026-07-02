@@ -35,6 +35,7 @@ module UmbrellioUtils
       def write(*)
         sio.write(*)
         flush if sio.string.size >= MAX_BUFFER_SIZE
+        self
       end
       alias << write
 
