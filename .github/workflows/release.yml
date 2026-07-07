@@ -22,7 +22,7 @@ jobs:
       - name: Push to RubyGems
         run: gem push pkg/*.gem
         env:
-          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+          GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
 
   github-release:
     needs: gem
