@@ -41,9 +41,7 @@ module UmbrellioUtils
     end
 
     def delete!
-      run(:lo_unlink, oid)
-    rescue Sequel::DatabaseError
-      # Ignored
+      run(:lo_unlink, oid) if exists?
     end
 
     def exists?
