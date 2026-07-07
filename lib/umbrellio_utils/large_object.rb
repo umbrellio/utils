@@ -42,7 +42,7 @@ module UmbrellioUtils
 
     def delete!
       run(:lo_unlink, oid)
-    rescue PG::UndefinedObject
+    rescue Sequel::DatabaseError
       # Ignored
     end
 
