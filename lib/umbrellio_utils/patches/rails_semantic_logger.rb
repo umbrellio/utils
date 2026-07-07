@@ -6,7 +6,7 @@ module UmbrellioUtils
   module Patches
     # Simplifies the "Completed" action controller log entry and enriches it with
     # GC, GVL and allocation stats.
-    # https://github.com/reidmorrison/rails_semantic_logger/blob/master/lib/rails_semantic_logger/action_controller/log_subscriber.rb
+    # https://github.com/reidmorrison/rails_semantic_logger/blob/master/lib/rails_semantic_logger/action_controller/log_subscriber.rb # rubocop:disable Layout/LineLength
     #
     # Require this file after the rails_semantic_logger gem has been loaded
     # (e.g. from an initializer).
@@ -45,6 +45,6 @@ module UmbrellioUtils
   end
 end
 
-::RailsSemanticLogger::ActionController::LogSubscriber.prepend(
+RailsSemanticLogger::ActionController::LogSubscriber.prepend(
   UmbrellioUtils::Patches::RailsSemanticLogger,
 )

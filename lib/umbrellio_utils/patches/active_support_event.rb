@@ -8,7 +8,7 @@ module UmbrellioUtils
   # require them explicitly from your application.
   module Patches
     # Extends ActiveSupport::Notifications::Event with GVL wait time and malloc stats.
-    # https://github.com/rails/rails/blob/main/activesupport/lib/active_support/notifications/instrumenter.rb
+    # https://github.com/rails/rails/blob/main/activesupport/lib/active_support/notifications/instrumenter.rb # rubocop:disable Layout/LineLength
     #
     # The GVL timer must be enabled in the application as early as possible:
     #   GVLTools::LocalTimer.enable
