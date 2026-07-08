@@ -2,41 +2,53 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
 jobs:
-  gem:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4"
-          bundler-cache: true
-
-      - name: Build gem
-        run: bundle exec rake build
-
-      - name: Push to RubyGems
-        run: gem push pkg/*.gem
-        env:
-          GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
-
-  github-release:
-    needs: gem
-    runs-on: ubuntu-24.04
+  release:
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create GitHub release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          generate_release_notes: true
+      - name: Extract version
+        id: version
+        run: |
+          version=$(grep -oP '(?<=VERSION = ")[^"]+' lib/umbrellio_utils/version.rb)
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check if release already exists
+        id: check
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" &>/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ruby/setup-ruby@v1
+        if: steps.check.outputs.exists == 'false'
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Build gem
+        if: steps.check.outputs.exists == 'false'
+        run: gem build umbrellio_utils.gemspec
+
+      - name: Push gem to RubyGems
+        if: steps.check.outputs.exists == 'false'
+        run: gem push *.gem
+        env:
+          GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
+
+      - uses: softprops/action-gh-release@v3
+        if: steps.check.outputs.exists == 'false'
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          files: "*.gem"
+          generate_release_notes: true
