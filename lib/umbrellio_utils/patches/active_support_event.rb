@@ -24,13 +24,13 @@ module UmbrellioUtils
       def start!
         super
         @gvl_time_start = GVLTools::LocalTimer.monotonic_time
-        @malloc_increase_bytes_start = GC.stat[:malloc_increase_bytes]
+        @malloc_increase_bytes_start = GC.stat(:malloc_increase_bytes)
       end
 
       def finish!
         super
         @gvl_time_finish = GVLTools::LocalTimer.monotonic_time
-        @malloc_increase_bytes_finish = GC.stat[:malloc_increase_bytes]
+        @malloc_increase_bytes_finish = GC.stat(:malloc_increase_bytes)
       end
 
       # Time the thread spent waiting for the GVL, in milliseconds
@@ -38,6 +38,9 @@ module UmbrellioUtils
         (@gvl_time_finish - @gvl_time_start) / 1_000_000.0
       end
 
+      # Delta of the process-global malloc counter: can be negative (it resets on GC)
+      # and includes sibling threads' allocations under threaded servers. Guard with
+      # #positive? where a counter is expected.
       def malloc_increase_bytes
         @malloc_increase_bytes_finish - @malloc_increase_bytes_start
       end
