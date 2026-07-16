@@ -22,19 +22,15 @@ module UmbrellioUtils
 
       def log_event(event)
         logger = ::SemanticLogger[event.payload[:worker] || "Sidekiq"]
-        exception = event.payload[:exception_object]
-
-        entry = {
+        logger.info(
           message: "Completed #perform",
           duration: event.duration,
           payload: metrics_payload(event),
-        }
-
-        exception ? logger.error(exception:, **entry) : logger.info(entry)
+        )
       end
 
       def metrics_payload(event)
-        {
+        payload = {
           worker: event.payload[:worker],
           queue: event.payload[:queue],
           gc_time: event.gc_time.round(PRECISION),
@@ -42,8 +38,12 @@ module UmbrellioUtils
           cpu_time: event.cpu_time.round(PRECISION),
           idle_time: event.idle_time.round(PRECISION),
           allocations: event.allocations,
-          allocation_bytes: event.malloc_increase_bytes,
+          # Off-heap malloc increase since the last GC (lower bound, unreliable across GC)
+          malloc_increase_bytes: event.malloc_increase_bytes,
         }
+        # [class, message] pair set by ActiveSupport::Notifications when the job raised
+        payload[:exception] = event.payload[:exception] if event.payload[:exception]
+        payload
       end
     end
   end

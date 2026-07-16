@@ -12,21 +12,17 @@ module UmbrellioUtils
     # (e.g. from an initializer).
     module RailsSemanticLogger
       PRECISION = 6
+      PARAMS_SIZE_LIMIT = 10_000
 
       def process_action(event)
         ::Rails.logger.info do
           payload = event.payload.dup
           payload[:path] = extract_path(payload[:path]) if payload.key?(:path)
+          payload[:params] = cap_params(payload[:params]) if payload.key?(:params)
 
           payload[:view_time] = payload.delete(:view_runtime).to_f.round(PRECISION)
           payload[:db_time] = payload.delete(:db_runtime).to_f.round(PRECISION)
-
-          payload[:gc_time] = event.gc_time.round(PRECISION)
-          payload[:gvl_time] = event.gvl_time.round(PRECISION)
-          payload[:cpu_time] = event.cpu_time.round(PRECISION)
-          payload[:idle_time] = event.idle_time.round(PRECISION)
-          payload[:allocations] = event.allocations
-          payload[:allocation_bytes] = event.malloc_increase_bytes
+          add_stats(payload, event)
 
           # Causes excessive log output with Rails 5 RC1
           payload.delete(:headers)
@@ -40,6 +36,30 @@ module UmbrellioUtils
             payload:,
           }
         end
+      end
+
+      private
+
+      def add_stats(payload, event)
+        payload[:gc_time] = event.gc_time.round(PRECISION)
+        payload[:gvl_time] = event.gvl_time.round(PRECISION)
+        payload[:cpu_time] = event.cpu_time.round(PRECISION)
+        payload[:idle_time] = event.idle_time.round(PRECISION)
+        payload[:allocations] = event.allocations
+        # Off-heap malloc increase since the last GC (lower bound, unreliable across GC);
+        # see UmbrellioUtils::Patches::ActiveSupportEvent#malloc_increase_bytes.
+        payload[:malloc_increase_bytes] = event.malloc_increase_bytes
+      end
+
+      def cap_params(params)
+        serialized = params.to_json
+        return params if serialized.bytesize <= PARAMS_SIZE_LIMIT
+
+        {
+          truncated: true,
+          bytesize: serialized.bytesize,
+          preview: "#{serialized[0, PARAMS_SIZE_LIMIT]}...",
+        }
       end
     end
   end

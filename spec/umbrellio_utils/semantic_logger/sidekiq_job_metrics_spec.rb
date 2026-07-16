@@ -37,20 +37,29 @@ describe UmbrellioUtils::SemanticLogger::SidekiqJobMetrics do
           cpu_time: be_a(Numeric),
           idle_time: be_a(Numeric),
           allocations: be_a(Integer),
-          allocation_bytes: be_an(Integer),
+          malloc_increase_bytes: be_an(Integer),
         },
       ),
     )
   end
 
-  it "logs failed job as an error with exception" do
+  it "logs a failed job at info with the exception class/message (no backtrace object)" do
     expect { instrument { raise "Boom!" } }.to raise_error("Boom!")
 
-    expect(logger).to have_received(:error).with(
+    expect(logger).to have_received(:info).with(
       hash_including(
         message: "Completed #perform",
-        exception: an_instance_of(RuntimeError),
+        payload: hash_including(exception: ["RuntimeError", "Boom!"]),
       ),
+    )
+    expect(logger).not_to have_received(:error)
+  end
+
+  it "omits the exception key for a successful job" do
+    instrument
+
+    expect(logger).to have_received(:info).with(
+      hash_including(payload: hash_not_including(:exception)),
     )
   end
 

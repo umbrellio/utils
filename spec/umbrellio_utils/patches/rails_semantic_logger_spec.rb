@@ -54,7 +54,7 @@ describe UmbrellioUtils::Patches::RailsSemanticLogger do
       cpu_time: be_a(Numeric),
       idle_time: be_a(Numeric),
       allocations: be_a(Integer),
-      allocation_bytes: be_an(Integer),
+      malloc_increase_bytes: be_an(Integer),
     )
 
     expect(log_entry[:payload].keys).not_to include(
@@ -67,6 +67,25 @@ describe UmbrellioUtils::Patches::RailsSemanticLogger do
 
     it "logs entry without path" do
       expect(log_entry[:payload].keys).not_to include(:path)
+    end
+  end
+
+  context "with small params" do
+    let(:payload) { super().merge(params: { "id" => "1" }) }
+
+    it "keeps params as-is" do
+      expect(log_entry[:payload][:params]).to eq("id" => "1")
+    end
+  end
+
+  context "with params over the size limit" do
+    let(:payload) { super().merge(params: { "blob" => "x" * 20_000, "id" => "1" }) }
+
+    it "keeps a truncated preview of the values plus the size" do
+      params = log_entry[:payload][:params]
+      expect(params).to include(truncated: true, bytesize: be > 20_000)
+      expect(params[:preview]).to start_with('{"blob":"xxx').and(end_with("..."))
+      expect(params[:preview].size).to be <= (described_class::PARAMS_SIZE_LIMIT + 3)
     end
   end
 end
