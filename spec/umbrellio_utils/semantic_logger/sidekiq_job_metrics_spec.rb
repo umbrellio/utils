@@ -27,7 +27,7 @@ describe UmbrellioUtils::SemanticLogger::SidekiqJobMetrics do
 
     expect(logger).to have_received(:info).with(
       hash_including(
-        message: "Completed #perform",
+        message: "Sidekiq job stats",
         duration: be_a(Float),
         payload: {
           worker: "SomeWorker",
@@ -48,7 +48,7 @@ describe UmbrellioUtils::SemanticLogger::SidekiqJobMetrics do
 
     expect(logger).to have_received(:info).with(
       hash_including(
-        message: "Completed #perform",
+        message: "Sidekiq job stats",
         payload: hash_including(exception: ["RuntimeError", "Boom!"]),
       ),
     )
