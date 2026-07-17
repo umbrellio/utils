@@ -13,6 +13,8 @@ module UmbrellioUtils
     # The GVL timer must be enabled in the application as early as possible:
     #   GVLTools::LocalTimer.enable
     module ActiveSupportEvent
+      STATS_PRECISION = 6
+
       def initialize(...)
         super
         @gvl_time_start = 0
@@ -43,6 +45,17 @@ module UmbrellioUtils
       # #positive? where a counter is expected.
       def malloc_increase_bytes
         @malloc_increase_bytes_finish - @malloc_increase_bytes_start
+      end
+
+      def stats(precision: STATS_PRECISION)
+        {
+          gc_time: gc_time.round(precision),
+          gvl_time: gvl_time.round(precision),
+          cpu_time: cpu_time.round(precision),
+          idle_time: idle_time.round(precision),
+          allocations:,
+          malloc_increase_bytes:,
+        }
       end
     end
   end

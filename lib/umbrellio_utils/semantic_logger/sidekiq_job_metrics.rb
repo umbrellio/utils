@@ -9,7 +9,6 @@ module UmbrellioUtils
     # fork of yabeda-sidekiq. Call +subscribe!+ from an initializer.
     module SidekiqJobMetrics
       MESSAGE = "Sidekiq job stats"
-      PRECISION = 6
 
       extend self
 
@@ -34,13 +33,7 @@ module UmbrellioUtils
         payload = {
           worker: event.payload[:worker],
           queue: event.payload[:queue],
-          gc_time: event.gc_time.round(PRECISION),
-          gvl_time: event.gvl_time.round(PRECISION),
-          cpu_time: event.cpu_time.round(PRECISION),
-          idle_time: event.idle_time.round(PRECISION),
-          allocations: event.allocations,
-          # Off-heap malloc increase since the last GC (lower bound, unreliable across GC)
-          malloc_increase_bytes: event.malloc_increase_bytes,
+          **event.stats,
         }
         # [class, message] pair set by ActiveSupport::Notifications when the job raised
         payload[:exception] = event.payload[:exception] if event.payload[:exception]

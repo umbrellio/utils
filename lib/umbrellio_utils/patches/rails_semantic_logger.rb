@@ -22,13 +22,16 @@ module UmbrellioUtils
 
           payload[:view_time] = payload.delete(:view_runtime).to_f.round(PRECISION)
           payload[:db_time] = payload.delete(:db_runtime).to_f.round(PRECISION)
-          add_stats(payload, event)
+          payload.merge!(event.stats)
 
           # Causes excessive log output with Rails 5 RC1
           payload.delete(:headers)
           # Causes recursion in Rails 6.1.rc1
           payload.delete(:request)
           payload.delete(:response)
+          # Keep only the [class, message] pair in :exception (set by ActiveSupport),
+          # not the raw exception with its backtrace — consistent with sidekiq_job_metrics.
+          payload.delete(:exception_object)
 
           {
             message: "Completed ##{payload[:action]}",
@@ -39,17 +42,6 @@ module UmbrellioUtils
       end
 
       private
-
-      def add_stats(payload, event)
-        payload[:gc_time] = event.gc_time.round(PRECISION)
-        payload[:gvl_time] = event.gvl_time.round(PRECISION)
-        payload[:cpu_time] = event.cpu_time.round(PRECISION)
-        payload[:idle_time] = event.idle_time.round(PRECISION)
-        payload[:allocations] = event.allocations
-        # Off-heap malloc increase since the last GC (lower bound, unreliable across GC);
-        # see UmbrellioUtils::Patches::ActiveSupportEvent#malloc_increase_bytes.
-        payload[:malloc_increase_bytes] = event.malloc_increase_bytes
-      end
 
       def cap_params(params)
         serialized = params.to_json

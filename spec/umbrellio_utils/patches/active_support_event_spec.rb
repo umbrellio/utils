@@ -21,4 +21,26 @@ describe UmbrellioUtils::Patches::ActiveSupportEvent do
     expect(event.gvl_time).to eq(0.0)
     expect(event.malloc_increase_bytes).to eq(0)
   end
+
+  describe "#stats" do
+    before do
+      event.start!
+      event.finish!
+    end
+
+    it "returns the shared timing/allocation field set" do
+      expect(event.stats).to match(
+        gc_time: be_a(Numeric),
+        gvl_time: be_a(Float),
+        cpu_time: be_a(Numeric),
+        idle_time: be_a(Numeric),
+        allocations: be_an(Integer),
+        malloc_increase_bytes: be_an(Integer),
+      )
+    end
+
+    it "rounds timings to the given precision" do
+      expect(event.stats(precision: 2)[:gvl_time]).to eq(event.gvl_time.round(2))
+    end
+  end
 end

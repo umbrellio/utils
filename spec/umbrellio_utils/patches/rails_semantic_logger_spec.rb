@@ -88,4 +88,18 @@ describe UmbrellioUtils::Patches::RailsSemanticLogger do
       expect(params[:preview].size).to be <= (described_class::PARAMS_SIZE_LIMIT + 3)
     end
   end
+
+  context "with a failed action" do
+    let(:payload) do
+      super().merge(
+        exception: ["RuntimeError", "Boom!"],
+        exception_object: RuntimeError.new("Boom!"),
+      )
+    end
+
+    it "keeps the [class, message] pair but drops the raw exception object" do
+      expect(log_entry[:payload]).to include(exception: ["RuntimeError", "Boom!"])
+      expect(log_entry[:payload].keys).not_to include(:exception_object)
+    end
+  end
 end
