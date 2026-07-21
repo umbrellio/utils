@@ -115,6 +115,32 @@ end
 Utils::Constants.useful_method #=> "Just string"
 ```
 
+### Instrumentation
+
+The gem ships a set of opt-in files for collecting GVL and allocation stats
+(they are not loaded by default and require the `gvltools` gem in your app):
+
+```ruby
+# Extends ActiveSupport::Notifications::Event with #gvl_time and #malloc_increase_bytes
+require "umbrellio_utils/patches/active_support_event"
+
+# Enriches the "Completed" action controller log entry (rails_semantic_logger)
+# with GC, GVL and allocation stats
+require "umbrellio_utils/patches/rails_semantic_logger"
+
+# Logs Sidekiq job completion with the same stats. Relies on the
+# "perform.sidekiq_job" notification published by the umbrellio fork of yabeda-sidekiq
+require "umbrellio_utils/semantic_logger/sidekiq_job_metrics"
+UmbrellioUtils::SemanticLogger::SidekiqJobMetrics.subscribe!
+```
+
+Don't forget to enable the GVL timer as early as possible (e.g. right after
+`Bundler.require` in `config/application.rb`):
+
+```ruby
+GVLTools::LocalTimer.enable
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/umbrellio/utils.

@@ -77,6 +77,54 @@ describe UmbrellioUtils::SemanticLogger::TinyJsonFormatter do
     end
   end
 
+  context "with duration and payload requested via custom_names_mapping" do
+    let(:custom_names_mapping) { Hash[duration: :duration, payload: :payload] }
+
+    before do
+      allow(log).to receive_messages(
+        duration: 152.3,
+        payload: { gvl_time: 12.4, allocations: 48_213 },
+      )
+    end
+
+    it "includes duration and payload" do
+      expect(result).to be_json_including(
+        message: "Some Message",
+        duration: 152.3,
+        payload: { gvl_time: 12.4, allocations: 48_213 },
+      )
+    end
+
+    context "with custom field names" do
+      let(:custom_names_mapping) { Hash[duration: :took_ms, payload: :details] }
+
+      it "uses custom names" do
+        expect(result).to be_json_including(
+          took_ms: 152.3,
+          details: { gvl_time: 12.4, allocations: 48_213 },
+        )
+      end
+    end
+
+    context "when values are absent" do
+      before { allow(log).to receive_messages(duration: nil, payload: nil) }
+
+      it "omits the fields" do
+        expect(JSON.parse(result).keys).not_to include("duration", "payload")
+      end
+    end
+  end
+
+  context "without duration and payload in the mapping" do
+    before do
+      allow(log).to receive_messages(duration: 152.3, payload: { some: :data })
+    end
+
+    it "does not log them" do
+      expect(JSON.parse(result).keys).not_to include("duration", "payload")
+    end
+  end
+
   context "message with some colorization" do
     let(:log_message) do
       "\e[1m\e[35mSQL (Total: 9MS, CH: 2MS)\e\e[0m SELECT \"database\"\e"

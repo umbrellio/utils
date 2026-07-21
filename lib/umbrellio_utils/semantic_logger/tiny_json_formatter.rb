@@ -20,6 +20,10 @@ module UmbrellioUtils
         time: :time,
       }.freeze
 
+      # Fields that are included in the output only when explicitly requested
+      # via +custom_names_mapping+ (e.g. <code>{ duration: :duration }</code>).
+      OPTIONAL_FIELDS = %i[duration payload].freeze
+
       # Returns a new instance of the {UmbrellioUtils::SemanticLogger::TinyJsonFormatter}.
       # @option [Integer] message_size_limit maximum number of characters in a log message
       # @option [Hash] custom_names_mapping mapping from default field names to custom ones.
@@ -31,6 +35,12 @@ module UmbrellioUtils
       # @option custom_names_mapping [Symbol] :tags custom name for the `tags` field.
       # @option custom_names_mapping [Symbol] :named_tags custom name for the `named_tags` field.
       # @option custom_names_mapping [Symbol] :time custom name for the `time` field.
+      # @option custom_names_mapping [Symbol] :duration enables logging of the `duration`
+      #   field under the given name. Unlike the default fields, it is not logged
+      #   unless explicitly listed in the mapping.
+      # @option custom_names_mapping [Symbol] :payload enables logging of the `payload`
+      #   field under the given name. Unlike the default fields, it is not logged
+      #   unless explicitly listed in the mapping.
       # @example Use custom name for the `message` and `time` fields
       #   UmbrellioUtils::SemanticLogger::TinyJsonFormatter.new(
       #     time: :timestamp, message: :note,
@@ -60,7 +70,17 @@ module UmbrellioUtils
       # Builds hash with data from log.
       # @return [Hash] the hash, which will be converted to the JSON later.
       def build_data_for(log)
-        field_names.values_at(*DEFAULT_NAMES_MAPPING.keys).zip(pack_data(log)).to_h
+        data = field_names.values_at(*DEFAULT_NAMES_MAPPING.keys).zip(pack_data(log)).to_h
+
+        OPTIONAL_FIELDS.each do |field|
+          field_name = field_names[field]
+          next if field_name.nil?
+
+          value = log.public_send(field)
+          data[field_name] = value unless value.nil?
+        end
+
+        data
       end
 
       # Builds an [Array] with all the required fields, which are arranged
