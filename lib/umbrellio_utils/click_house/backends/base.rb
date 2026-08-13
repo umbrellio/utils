@@ -13,12 +13,33 @@ module UmbrellioUtils
       class Base
         include Singleton
 
-        # ClickHouse uses C-style escape sequences in string literals, so
-        # backslashes must be doubled. Sequel's default (Postgres) escaping
-        # only escapes single-quotes.
-        module ClickHouseStringEscaping
+        # ClickHouse-specific dataset behaviour: string escaping plus grammar
+        # Sequel's Postgres dataset doesn't know about.
+        module ClickHouseDatasetMethods
+          # ClickHouse uses C-style escape sequences in string literals, so
+          # backslashes must be doubled. Sequel's default (Postgres) escaping
+          # only escapes single-quotes.
           def literal_string_append(sql, str)
             sql << "'" << str.gsub("\\") { "\\\\" }.gsub("'", "''") << "'"
+          end
+
+          # ClickHouse `LIMIT n BY expr, ...` — keeps the first n rows per
+          # distinct combination of the expressions, applied after ORDER BY.
+          def limit_by(*exprs, n: 1)
+            raise Sequel::Error, "limit_by requires at least one expression" if exprs.empty?
+            clone(limit_by: { exprs:, n: })
+          end
+
+          # `LIMIT n BY` precedes the regular LIMIT/OFFSET in ClickHouse.
+          def select_limit_sql(sql)
+            if (limit_by = @opts[:limit_by])
+              sql << " LIMIT "
+              literal_append(sql, limit_by[:n])
+              sql << " BY "
+              expression_list_append(sql, limit_by[:exprs])
+            end
+
+            super
           end
         end
 
@@ -36,7 +57,7 @@ module UmbrellioUtils
             else
               DB.from(source)
             end
-          ds.clone(ch: true).with_extend(ClickHouseStringEscaping)
+          ds.clone(ch: true).with_extend(ClickHouseDatasetMethods)
         end
 
         def count(dataset)

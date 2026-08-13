@@ -55,6 +55,38 @@ describe UmbrellioUtils::ClickHouse do
     end
   end
 
+  describe "#limit_by" do
+    it "emits LIMIT 1 BY for a single expression" do
+      expect(ch.from(:test).order(:id).limit_by(:id).sql).to eq(
+        'SELECT * FROM "test" ORDER BY "id" LIMIT 1 BY "id"',
+      )
+    end
+
+    it "emits every expression and honors n" do
+      ds = ch.from(:test).order(:id).limit_by(:id, :name, n: 2)
+      expect(ds.sql).to eq('SELECT * FROM "test" ORDER BY "id" LIMIT 2 BY "id", "name"')
+    end
+
+    it "places LIMIT n BY before LIMIT/OFFSET" do
+      ds = ch.from(:test).order(:id).limit_by(:id).limit(2, 1)
+      expect(ds.sql).to eq('SELECT * FROM "test" ORDER BY "id" LIMIT 1 BY "id" LIMIT 2 OFFSET 1')
+    end
+
+    it "accepts raw expressions" do
+      ds = ch.from(:test).order(:id).limit_by(Sequel.lit("id % 2"))
+      expect(ds.sql).to eq('SELECT * FROM "test" ORDER BY "id" LIMIT 1 BY id % 2')
+    end
+
+    it "raises without expressions" do
+      expect { ch.from(:test).limit_by }.to raise_error(Sequel::Error, /at least one expression/)
+    end
+
+    it "collapses rows by the given expression" do
+      query = ch.from(:test).order(Sequel.desc(:id)).limit_by(Sequel.lit("id % 2")).select(:id)
+      expect(ch.query(query)).to eq([{ id: 3 }, { id: 2 }])
+    end
+  end
+
   describe "#query" do
     specify do
       query = ch.from(:test).order(:id).select(:id)
