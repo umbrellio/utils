@@ -116,8 +116,8 @@ module UmbrellioUtils
           ds.clone(ch: true).with_extend(ClickHouseDatasetMethods)
         end
 
-        def count(dataset)
-          query_value(dataset.select(SQL.ch_count))
+        def count(dataset, **)
+          query_value(dataset.select(SQL.ch_count), **)
         end
 
         # Sorting key / version / is_deleted of a ReplacingMergeTree table.
@@ -232,6 +232,17 @@ module UmbrellioUtils
         end
 
         protected
+
+        # `final` is usually a session-wide default, which would make a
+        # deduplicated query merge the whole table inside its own subquery —
+        # slow and redundant, since the subquery already collapses versions.
+        # An explicit `final:` from the caller always wins.
+        def settings_for(dataset, opts)
+          return opts if opts.key?(:final)
+          return opts unless dataset.is_a?(Sequel::Dataset) && dataset.opts[:ch_dedup]
+
+          opts.merge(final: 0)
+        end
 
         def build_table_metadata(db_name, table_name)
           row = query(
