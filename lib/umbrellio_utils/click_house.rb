@@ -10,12 +10,13 @@ module UmbrellioUtils
     extend self
 
     autoload :Backends, "umbrellio_utils/click_house/backends"
+    autoload :TableMetadata, "umbrellio_utils/click_house/table_metadata"
 
     VALID_BACKENDS = %i[legacy native].freeze
 
     DELEGATED = %i[
       execute query query_value query_each count insert
-      from describe_table server_version tables
+      from describe_table server_version tables table_metadata
       create_database drop_database db_name config
       truncate_table! drop_table! optimize_table! on_cluster
       parse_value pg_table_connection populate_temp_table! with_temp_table

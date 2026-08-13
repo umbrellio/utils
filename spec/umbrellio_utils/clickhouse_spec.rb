@@ -63,7 +63,7 @@ describe UmbrellioUtils::ClickHouse do
     end
 
     it "emits every expression and honors n" do
-      ds = ch.from(:test).order(:id).limit_by(:id, :name, n: 2)
+      ds = ch.from(:test).order(:id).limit_by(:id, :name, rows: 2)
       expect(ds.sql).to eq('SELECT * FROM "test" ORDER BY "id" LIMIT 2 BY "id", "name"')
     end
 

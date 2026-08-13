@@ -25,16 +25,16 @@ module UmbrellioUtils
 
           # ClickHouse `LIMIT n BY expr, ...` — keeps the first n rows per
           # distinct combination of the expressions, applied after ORDER BY.
-          def limit_by(*exprs, n: 1)
+          def limit_by(*exprs, rows: 1)
             raise Sequel::Error, "limit_by requires at least one expression" if exprs.empty?
-            clone(limit_by: { exprs:, n: })
+            clone(limit_by: { exprs:, rows: })
           end
 
           # `LIMIT n BY` precedes the regular LIMIT/OFFSET in ClickHouse.
           def select_limit_sql(sql)
             if (limit_by = @opts[:limit_by])
               sql << " LIMIT "
-              literal_append(sql, limit_by[:n])
+              literal_append(sql, limit_by[:rows])
               sql << " BY "
               expression_list_append(sql, limit_by[:exprs])
             end
@@ -62,6 +62,18 @@ module UmbrellioUtils
 
         def count(dataset)
           query_value(dataset.select(SQL.ch_count))
+        end
+
+        # Sorting key / version / is_deleted of a ReplacingMergeTree table.
+        # Distributed tables carry none of these, so they are resolved through
+        # to the local table they wrap. Memoized per process, like the layout
+        # it describes: a table's engine does not change under a running app.
+        def table_metadata(table_name, db_name: self.db_name)
+          key = [db_name.to_s, table_name.to_s]
+          @table_metadata_cache ||= {}
+          return @table_metadata_cache[key] if @table_metadata_cache.key?(key)
+
+          @table_metadata_cache[key] = build_table_metadata(*key)
         end
 
         def db_name
@@ -164,6 +176,25 @@ module UmbrellioUtils
         end
 
         protected
+
+        def build_table_metadata(db_name, table_name)
+          row = query(
+            from(:tables, db_name: :system)
+              .where(database: db_name, name: table_name)
+              .select(:engine, :engine_full, :sorting_key),
+          ).first
+
+          unless row
+            raise ClickHouse::TableMetadata::UnknownTable, "#{db_name}.#{table_name} not found"
+          end
+
+          if row[:engine] == "Distributed"
+            database, table = ClickHouse::TableMetadata.distributed_target(row[:engine_full])
+            return table_metadata(table, db_name: database)
+          end
+
+          ClickHouse::TableMetadata.parse(**row)
+        end
 
         def log_errors(sql)
           yield
