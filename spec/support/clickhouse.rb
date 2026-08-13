@@ -26,6 +26,14 @@ client.execute(<<~SQL)
   ORDER BY (group_id, id);
 SQL
 
+# Version but no is_deleted — the outer delete filter must then be omitted.
+client.execute(<<~SQL)
+  CREATE TABLE IF NOT EXISTS test_replacing_no_delete
+  (id Int32, payload String, version Int32)
+  ENGINE = ReplacingMergeTree(version)
+  ORDER BY id;
+SQL
+
 # Distributed tables carry no sorting key of their own, so metadata lookup has
 # to resolve through to the local table.
 client.execute(<<~SQL)

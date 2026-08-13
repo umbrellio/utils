@@ -41,6 +41,62 @@ module UmbrellioUtils
 
             super
           end
+
+          # Collapse a ReplacingMergeTree's row versions by hand instead of
+          # relying on the `final` setting, which merges the whole table.
+          #
+          # This is a boundary: everything chained BEFORE it goes inside the
+          # dedup subquery, everything chained AFTER applies to the result.
+          # Only immutable selectors belong before it — filtering a mutable
+          # column first can match a superseded version and resurrect a row
+          # that FINAL would have dropped. `is_deleted` is applied after the
+          # boundary for the same reason.
+          def deduplicate
+            table_name, db_name = deduplication_source
+            meta = ClickHouse.table_metadata(table_name, **db_name)
+
+            unless meta.version
+              raise Sequel::Error,
+                    "#{table_name} declares no version column; deduplicate needs one"
+            end
+
+            inner = order(Sequel.desc(meta.version))
+              .limit_by(*meta.sorting_key.map { |expr| Sequel.lit(expr) })
+
+            wrapped = ClickHouse.from(alias_for_source ? inner.as(alias_for_source) : inner)
+              .clone(ch_dedup: true)
+
+            meta.is_deleted ? wrapped.where(meta.is_deleted => 0) : wrapped
+          end
+
+          private
+
+          def alias_for_source
+            source = Array(@opts[:from]).first
+            source.alias if source.is_a?(Sequel::SQL::AliasedExpression)
+          end
+
+          # => [table_name, {} | { db_name: ... }]
+          def deduplication_source
+            sources = Array(@opts[:from])
+            source = sources.first
+            source = source.expression if source.is_a?(Sequel::SQL::AliasedExpression)
+
+            if sources.size != 1 || @opts[:join]
+              raise Sequel::Error, "deduplicate requires a single table source"
+            end
+
+            case source
+            when Sequel::SQL::QualifiedIdentifier
+              [source.column, { db_name: source.table }]
+            when Sequel::SQL::Identifier
+              [source.value, {}]
+            when Symbol
+              [source, {}]
+            else
+              raise Sequel::Error, "deduplicate requires a single table source"
+            end
+          end
         end
 
         # Concrete backends implement the low-level ops (execute / query /
