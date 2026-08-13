@@ -45,9 +45,42 @@ describe UmbrellioUtils::ClickHouse do
         expect(ds.where(Sequel[:rows][:payload] => "x").sql).to include('"rows"."payload"')
       end
 
-      it "refuses a dataset without exactly one table source" do
+      it "keeps a caller's projection outside the subquery" do
+        sql = ch.from(:test_replacing).select(:id).deduplicate.sql
+        expect(sql).to start_with('SELECT "id" FROM (SELECT * FROM "test_replacing"')
+        expect(sql).to include('WHERE ("is_deleted" = 0)')
+      end
+
+      it "orders by version first and keeps the caller's ordering as a tiebreaker" do
+        sql = ch.from(:test_replacing).order(:payload).deduplicate.sql
+        expect(sql).to include('ORDER BY "version" DESC, "payload" LIMIT 1 BY')
+      end
+    end
+
+    describe "refusals" do
+      it "refuses a joined dataset" do
         ds = ch.from(:test_replacing).join(Sequel[:test].as(:t), id: :id)
         expect { ds.deduplicate }.to raise_error(Sequel::Error, /single table source/)
+      end
+
+      it "refuses more than one source" do
+        ds = ch.from(:test_replacing).from(:test_replacing, :test)
+        expect { ds.deduplicate }.to raise_error(Sequel::Error, /single table source/)
+      end
+
+      it "refuses a subquery source" do
+        ds = ch.from(ch.from(:test_replacing))
+        expect { ds.deduplicate }.to raise_error(Sequel::Error, /single table source/)
+      end
+
+      it "refuses a non-replacing engine" do
+        expect { ch.from(:test).deduplicate }
+          .to raise_error(Sequel::Error, /MergeTree.*ReplacingMergeTree/)
+      end
+
+      it "refuses a Replacing table with no version column" do
+        expect { ch.from(:test_replacing_no_version).deduplicate }
+          .to raise_error(Sequel::Error, /declares no version column/)
       end
     end
 

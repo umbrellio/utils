@@ -62,9 +62,21 @@ describe UmbrellioUtils::ClickHouse::TableMetadata do
       expect(parse("ReplacingMergeTree(v) ORDER BY id", sorting_key: "").sorting_key).to eq([])
     end
 
-    it "rejects a non-replacing engine" do
-      expect { parse("MergeTree PARTITION BY toYYYYMM(created_at) ORDER BY id") }
-        .to raise_error(described_class::UnsupportedEngine, /MergeTree/)
+    it "reports a non-replacing engine without version columns" do
+      meta = parse("MergeTree PARTITION BY toYYYYMM(created_at) ORDER BY id")
+      expect(meta).to have_attributes(
+        engine: "MergeTree", replacing?: false, version: nil, is_deleted: nil,
+      )
+      expect(meta.sorting_key).to eq(%w[id])
+    end
+
+    it "does not treat a parenthesis inside a quoted argument as structure" do
+      meta = parse(
+        "ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/db)/t', '{replica}', " \
+        "version, is_deleted) ORDER BY id",
+      )
+      expect(meta.version).to eq(:version)
+      expect(meta.is_deleted).to eq(:is_deleted)
     end
   end
 
@@ -105,9 +117,10 @@ describe UmbrellioUtils::ClickHouse do
         .to raise_error(described_class::TableMetadata::UnknownTable, /no_such_table_here/)
     end
 
-    it "raises for a non-replacing engine" do
-      expect { ch.table_metadata(:test) }
-        .to raise_error(described_class::TableMetadata::UnsupportedEngine)
+    it "answers the sorting key of a non-replacing table" do
+      meta = ch.table_metadata(:test)
+      expect(meta).to have_attributes(engine: "MergeTree", replacing?: false)
+      expect(meta.sorting_key).to eq(%w[id])
     end
   end
 end

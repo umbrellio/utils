@@ -55,25 +55,40 @@ module UmbrellioUtils
             table_name, db_name = deduplication_source
             meta = ClickHouse.table_metadata(table_name, **db_name)
 
+            unless meta.replacing?
+              raise Sequel::Error,
+                    "#{table_name} is a #{meta.engine}; deduplicate needs a ReplacingMergeTree"
+            end
+
             unless meta.version
               raise Sequel::Error,
                     "#{table_name} declares no version column; deduplicate needs one"
             end
 
-            inner = order(Sequel.desc(meta.version))
-              .limit_by(*meta.sorting_key.map { |expr| Sequel.lit(expr) })
-
-            wrapped = ClickHouse.from(alias_for_source ? inner.as(alias_for_source) : inner)
+            wrapped = ClickHouse.from(wrap_source(deduplicated_source(meta)))
               .clone(ch_dedup: true)
+              .then { |ds| @opts[:select] ? ds.select(*@opts[:select]) : ds }
 
             meta.is_deleted ? wrapped.where(meta.is_deleted => 0) : wrapped
           end
 
           private
 
-          def alias_for_source
+          # The subquery must project every column, both so the outer query can
+          # filter on `is_deleted` and so a caller's projection still resolves;
+          # that projection is re-applied outside instead.
+          #
+          # The version ordering leads, since it decides which row survives —
+          # any ordering the caller set is kept after it as a tiebreaker.
+          def deduplicated_source(meta)
+            clone(select: nil)
+              .order(Sequel.desc(meta.version), *@opts[:order])
+              .limit_by(*meta.sorting_key.map { |expr| Sequel.lit(expr) })
+          end
+
+          def wrap_source(inner)
             source = Array(@opts[:from]).first
-            source.alias if source.is_a?(Sequel::SQL::AliasedExpression)
+            source.is_a?(Sequel::SQL::AliasedExpression) ? inner.as(source.alias) : inner
           end
 
           # => [table_name, {} | { db_name: ... }]
@@ -91,8 +106,6 @@ module UmbrellioUtils
               [source.column, { db_name: source.table }]
             when Sequel::SQL::Identifier
               [source.value, {}]
-            when Symbol
-              [source, {}]
             else
               raise Sequel::Error, "deduplicate requires a single table source"
             end
@@ -232,6 +245,13 @@ module UmbrellioUtils
         end
 
         protected
+
+        # Every read path needs both halves, and pairing them here keeps a new
+        # one from silently reinstating session-wide FINAL inside a dedup
+        # subquery — the exact cost `deduplicate` exists to remove.
+        def prepare_query(dataset, opts)
+          [sql_for(dataset), settings_for(dataset, opts)]
+        end
 
         # `final` is usually a session-wide default, which would make a
         # deduplicated query merge the whole table inside its own subquery —

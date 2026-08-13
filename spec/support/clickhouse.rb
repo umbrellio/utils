@@ -34,6 +34,15 @@ client.execute(<<~SQL)
   ORDER BY id;
 SQL
 
+# A Replacing engine declared without a version argument is legal, and
+# deduplicate cannot pick a winner on one.
+client.execute(<<~SQL)
+  CREATE TABLE IF NOT EXISTS test_replacing_no_version
+  (id Int32, payload String)
+  ENGINE = ReplacingMergeTree
+  ORDER BY id;
+SQL
+
 # Distributed tables carry no sorting key of their own, so metadata lookup has
 # to resolve through to the local table.
 client.execute(<<~SQL)

@@ -142,6 +142,10 @@ The sorting key, version column and `is_deleted` column are read from `system.ta
 
 `is_deleted` is applied after the boundary for exactly that reason, and is omitted when the engine declares no such column.
 
+Two chain methods are handled rather than passed through, because the dedup subquery has to control them: the subquery always projects `SELECT *` (so the outer query can still filter on `is_deleted` and on columns you did not select) and any projection you set is re-applied outside it; and the version ordering leads the subquery's `ORDER BY`, since it decides which row survives, with any ordering you set kept after it as a tiebreaker.
+
+`#deduplicate` raises on a table it cannot collapse — a non-Replacing engine, a Replacing engine declared without a version argument, or a dataset that is not a single table source (joined, multi-source, or a subquery).
+
 ### Instrumentation
 
 The gem ships a set of opt-in files for collecting GVL and allocation stats
