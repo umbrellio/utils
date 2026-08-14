@@ -115,6 +115,37 @@ end
 Utils::Constants.useful_method #=> "Just string"
 ```
 
+### ClickHouse deduplication
+
+Datasets built with `CH.from` understand ClickHouse's `LIMIT n BY`:
+
+```ruby
+CH.from(:events).order(Sequel.desc(:version)).limit_by(:user_id, rows: 3)
+#=> SELECT * FROM "events" ORDER BY "version" DESC LIMIT 3 BY "user_id"
+```
+
+On a `ReplacingMergeTree` table, `#deduplicate` uses that to collapse row versions by hand rather than relying on the `final` setting, which merges the entire table even for a point lookup:
+
+```ruby
+CH.from(:external_operations_distributed)
+  .where(order_id: 42)   # inside the dedup subquery
+  .deduplicate           # boundary
+  .order(:created_at)    # outside
+```
+
+The sorting key, version column and `is_deleted` column are read from `system.tables` and cached per process; `Distributed` tables are resolved through to the local table they wrap. Deduplicated datasets are sent with `final: 0` automatically, since running FINAL inside the subquery would be both slow and redundant. An explicit `final:` passed to `query` / `count` always wins.
+
+`#deduplicate` is a boundary, and which side a filter lands on matters:
+
+- **Before it — immutable selectors only** (primary keys, foreign keys). Filtering a *mutable* column first can match a superseded row version and resurrect a row that FINAL would have dropped.
+- **After it — everything else**, including any filter on a column that changes over a row's lifetime.
+
+`is_deleted` is applied after the boundary for exactly that reason, and is omitted when the engine declares no such column.
+
+Two chain methods are handled rather than passed through, because the dedup subquery has to control them: the subquery always projects `SELECT *` (so the outer query can still filter on `is_deleted` and on columns you did not select) and any projection you set is re-applied outside it; and the version ordering leads the subquery's `ORDER BY`, since it decides which row survives, with any ordering you set kept after it as a tiebreaker.
+
+`#deduplicate` raises on a table it cannot collapse — a non-Replacing engine, a Replacing engine declared without a version argument, or a dataset that is not a single table source (joined, multi-source, or a subquery).
+
 ### Instrumentation
 
 The gem ships a set of opt-in files for collecting GVL and allocation stats

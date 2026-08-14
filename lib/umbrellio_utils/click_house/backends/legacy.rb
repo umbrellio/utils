@@ -16,15 +16,15 @@ module UmbrellioUtils
         end
 
         def query(dataset, host: nil, **opts)
-          sql = sql_for(dataset)
+          sql, settings = prepare_query(dataset, opts)
           log_errors(sql) do
-            select_all(sql, host:, **opts).map { |x| Misc::StrictHash[x.symbolize_keys] }
+            select_all(sql, host:, **settings).map { |x| Misc::StrictHash[x.symbolize_keys] }
           end
         end
 
         def query_value(dataset, host: nil, **opts)
-          sql = sql_for(dataset)
-          log_errors(sql) { select_value(sql, host:, **opts) }
+          sql, settings = prepare_query(dataset, opts)
+          log_errors(sql) { select_value(sql, host:, **settings) }
         end
 
         def query_each(dataset, host: nil, **, &)

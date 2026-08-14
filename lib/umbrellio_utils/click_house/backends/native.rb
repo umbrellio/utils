@@ -29,18 +29,18 @@ module UmbrellioUtils
         end
 
         def query(dataset, host: nil, **opts) # rubocop:disable Lint/UnusedMethodArgument
-          sql = sql_for(dataset)
-          log_errors(sql) { pool.query(sql, settings: opts) }
+          sql, settings = prepare_query(dataset, opts)
+          log_errors(sql) { pool.query(sql, settings:) }
         end
 
         def query_value(dataset, host: nil, **opts) # rubocop:disable Lint/UnusedMethodArgument
-          sql = sql_for(dataset)
-          log_errors(sql) { pool.query_value(sql, settings: opts) }
+          sql, settings = prepare_query(dataset, opts)
+          log_errors(sql) { pool.query_value(sql, settings:) }
         end
 
         def query_each(dataset, host: nil, **opts, &) # rubocop:disable Lint/UnusedMethodArgument
-          sql = sql_for(dataset)
-          log_errors(sql) { pool.query_each(sql, settings: opts, &) }
+          sql, settings = prepare_query(dataset, opts)
+          log_errors(sql) { pool.query_each(sql, settings:, &) }
         end
 
         def insert(table_name, db_name: self.db_name, rows: [])

@@ -13,12 +13,102 @@ module UmbrellioUtils
       class Base
         include Singleton
 
-        # ClickHouse uses C-style escape sequences in string literals, so
-        # backslashes must be doubled. Sequel's default (Postgres) escaping
-        # only escapes single-quotes.
-        module ClickHouseStringEscaping
+        # ClickHouse-specific dataset behaviour: string escaping plus grammar
+        # Sequel's Postgres dataset doesn't know about.
+        module ClickHouseDatasetMethods
+          # ClickHouse uses C-style escape sequences in string literals, so
+          # backslashes must be doubled. Sequel's default (Postgres) escaping
+          # only escapes single-quotes.
           def literal_string_append(sql, str)
             sql << "'" << str.gsub("\\") { "\\\\" }.gsub("'", "''") << "'"
+          end
+
+          # ClickHouse `LIMIT n BY expr, ...` — keeps the first n rows per
+          # distinct combination of the expressions, applied after ORDER BY.
+          def limit_by(*exprs, rows: 1)
+            raise Sequel::Error, "limit_by requires at least one expression" if exprs.empty?
+            clone(limit_by: { exprs:, rows: })
+          end
+
+          # `LIMIT n BY` precedes the regular LIMIT/OFFSET in ClickHouse.
+          def select_limit_sql(sql)
+            if (limit_by = @opts[:limit_by])
+              sql << " LIMIT "
+              literal_append(sql, limit_by[:rows])
+              sql << " BY "
+              expression_list_append(sql, limit_by[:exprs])
+            end
+
+            super
+          end
+
+          # Collapse a ReplacingMergeTree's row versions by hand instead of
+          # relying on the `final` setting, which merges the whole table.
+          #
+          # This is a boundary: everything chained BEFORE it goes inside the
+          # dedup subquery, everything chained AFTER applies to the result.
+          # Only immutable selectors belong before it — filtering a mutable
+          # column first can match a superseded version and resurrect a row
+          # that FINAL would have dropped. `is_deleted` is applied after the
+          # boundary for the same reason.
+          def deduplicate
+            table_name, db_name = deduplication_source
+            meta = ClickHouse.table_metadata(table_name, **db_name)
+
+            unless meta.replacing?
+              raise Sequel::Error,
+                    "#{table_name} is a #{meta.engine}; deduplicate needs a ReplacingMergeTree"
+            end
+
+            unless meta.version
+              raise Sequel::Error,
+                    "#{table_name} declares no version column; deduplicate needs one"
+            end
+
+            wrapped = ClickHouse.from(wrap_source(deduplicated_source(meta)))
+              .clone(ch_dedup: true)
+              .then { |ds| @opts[:select] ? ds.select(*@opts[:select]) : ds }
+
+            meta.is_deleted ? wrapped.where(meta.is_deleted => 0) : wrapped
+          end
+
+          private
+
+          # The subquery must project every column, both so the outer query can
+          # filter on `is_deleted` and so a caller's projection still resolves;
+          # that projection is re-applied outside instead.
+          #
+          # The version ordering leads, since it decides which row survives —
+          # any ordering the caller set is kept after it as a tiebreaker.
+          def deduplicated_source(meta)
+            clone(select: nil)
+              .order(Sequel.desc(meta.version), *@opts[:order])
+              .limit_by(*meta.sorting_key.map { |expr| Sequel.lit(expr) })
+          end
+
+          def wrap_source(inner)
+            source = Array(@opts[:from]).first
+            source.is_a?(Sequel::SQL::AliasedExpression) ? inner.as(source.alias) : inner
+          end
+
+          # => [table_name, {} | { db_name: ... }]
+          def deduplication_source
+            sources = Array(@opts[:from])
+            source = sources.first
+            source = source.expression if source.is_a?(Sequel::SQL::AliasedExpression)
+
+            if sources.size != 1 || @opts[:join]
+              raise Sequel::Error, "deduplicate requires a single table source"
+            end
+
+            case source
+            when Sequel::SQL::QualifiedIdentifier
+              [source.column, { db_name: source.table }]
+            when Sequel::SQL::Identifier
+              [source.value, {}]
+            else
+              raise Sequel::Error, "deduplicate requires a single table source"
+            end
           end
         end
 
@@ -36,11 +126,23 @@ module UmbrellioUtils
             else
               DB.from(source)
             end
-          ds.clone(ch: true).with_extend(ClickHouseStringEscaping)
+          ds.clone(ch: true).with_extend(ClickHouseDatasetMethods)
         end
 
-        def count(dataset)
-          query_value(dataset.select(SQL.ch_count))
+        def count(dataset, **)
+          query_value(dataset.select(SQL.ch_count), **)
+        end
+
+        # Sorting key / version / is_deleted of a ReplacingMergeTree table.
+        # Distributed tables carry none of these, so they are resolved through
+        # to the local table they wrap. Memoized per process, like the layout
+        # it describes: a table's engine does not change under a running app.
+        def table_metadata(table_name, db_name: self.db_name)
+          key = [db_name.to_s, table_name.to_s]
+          @table_metadata_cache ||= {}
+          return @table_metadata_cache[key] if @table_metadata_cache.key?(key)
+
+          @table_metadata_cache[key] = build_table_metadata(*key)
         end
 
         def db_name
@@ -143,6 +245,43 @@ module UmbrellioUtils
         end
 
         protected
+
+        # Every read path needs both halves, and pairing them here keeps a new
+        # one from silently reinstating session-wide FINAL inside a dedup
+        # subquery — the exact cost `deduplicate` exists to remove.
+        def prepare_query(dataset, opts)
+          [sql_for(dataset), settings_for(dataset, opts)]
+        end
+
+        # `final` is usually a session-wide default, which would make a
+        # deduplicated query merge the whole table inside its own subquery —
+        # slow and redundant, since the subquery already collapses versions.
+        # An explicit `final:` from the caller always wins.
+        def settings_for(dataset, opts)
+          return opts if opts.key?(:final)
+          return opts unless dataset.is_a?(Sequel::Dataset) && dataset.opts[:ch_dedup]
+
+          opts.merge(final: 0)
+        end
+
+        def build_table_metadata(db_name, table_name)
+          row = query(
+            from(:tables, db_name: :system)
+              .where(database: db_name, name: table_name)
+              .select(:engine, :engine_full, :sorting_key),
+          ).first
+
+          unless row
+            raise ClickHouse::TableMetadata::UnknownTable, "#{db_name}.#{table_name} not found"
+          end
+
+          if row[:engine] == "Distributed"
+            database, table = ClickHouse::TableMetadata.distributed_target(row[:engine_full])
+            return table_metadata(table, db_name: database)
+          end
+
+          ClickHouse::TableMetadata.parse(**row)
+        end
 
         def log_errors(sql)
           yield
