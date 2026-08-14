@@ -24,14 +24,17 @@ module UmbrellioUtils
       end
 
       class << self
+        # Built first so it can answer #replacing? for itself — the engine
+        # test lives in one place only.
         def parse(engine:, engine_full:, sorting_key:)
-          key = split_args(sorting_key)
-          return new(engine, key, nil, nil) unless engine.include?("Replacing")
+          meta = new(engine, split_args(sorting_key), nil, nil)
+          return meta unless meta.replacing?
 
           args = engine_args(engine_full)
           args = args.drop(REPLICATED_ARGS_COUNT) if engine.start_with?("Replicated")
+          meta.version, meta.is_deleted = args[0]&.to_sym, args[1]&.to_sym
 
-          new(engine, key, args[0]&.to_sym, args[1]&.to_sym)
+          meta
         end
 
         # Distributed('cluster', 'database', 'table'[, sharding_key])
