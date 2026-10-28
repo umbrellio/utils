@@ -117,16 +117,15 @@ module UmbrellioUtils
         # / config / logger) and define SERVER_ERROR.
 
         def from(source, db_name: self.db_name)
-          ds =
-            case source
-            when Symbol
-              DB.from(db_name == self.db_name ? SQL[source] : SQL[db_name][source])
-            when nil
-              DB.dataset
-            else
-              DB.from(source)
-            end
-          ds.clone(ch: true).with_extend(ClickHouseDatasetMethods)
+          ds = base_dataset
+          case source
+          when Symbol
+            ds.from(db_name == self.db_name ? SQL[source] : SQL[db_name][source])
+          when nil
+            ds
+          else
+            ds.from(source)
+          end
         end
 
         def count(dataset, **)
@@ -245,6 +244,12 @@ module UmbrellioUtils
         end
 
         protected
+
+        def base_dataset
+          return @base_dataset if @base_dataset&.db.equal?(DB)
+
+          @base_dataset = DB.dataset.clone(ch: true).with_extend(ClickHouseDatasetMethods)
+        end
 
         # Every read path needs both halves, and pairing them here keeps a new
         # one from silently reinstating session-wide FINAL inside a dedup

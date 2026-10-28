@@ -10,6 +10,26 @@ describe UmbrellioUtils::ClickHouse do
   end
 
   describe "#from" do
+    it "reuses the same dataset class for every source kind" do
+      datasets = [ch.from(:a), ch.from(:b), ch.from(nil), ch.from(ch.from(:a))]
+
+      expect(datasets.map(&:class)).to all(equal(datasets.first.class))
+    end
+
+    it "marks every source kind as a ClickHouse dataset" do
+      datasets = [ch.from(:a), ch.from(nil), ch.from(ch.from(:a)), ch.from(Sequel[:a].as(:b))]
+
+      expect(datasets.map { |dataset| dataset.opts[:ch] }).to all(be(true))
+    end
+
+    it "uses the current DB after the constant is replaced" do
+      ch.from(:a)
+      replacement_db = Sequel.mock
+      stub_const("DB", replacement_db)
+
+      expect(ch.from(:b).db).to equal(replacement_db)
+    end
+
     context "with another db" do
       specify do
         expect(ch.from(:test, db_name: :test).sql).to eq(
