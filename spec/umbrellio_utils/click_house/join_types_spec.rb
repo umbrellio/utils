@@ -41,9 +41,7 @@ describe UmbrellioUtils::ClickHouse do
       expect(dataset.join_table(:bogus, :b).sql).to include('FROM "a" BOGUS JOIN "b"')
     end
 
-    has_join_deprecations = Gem::Version.new(Sequel::VERSION) >= Gem::Version.new("5.109.0")
-    it "preserves Sequel's deprecation for an unknown join type",
-       skip: ("Sequel 5.109 introduced join type deprecations" unless has_join_deprecations) do
+    it "preserves Sequel's deprecation for an unknown join type" do
       dataset.join_table(:bogus, :b).sql
 
       expect(deprecations.string).to include("Unrecognized join type used: :bogus.")
