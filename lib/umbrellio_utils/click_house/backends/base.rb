@@ -16,6 +16,10 @@ module UmbrellioUtils
         # ClickHouse-specific dataset behaviour: string escaping plus grammar
         # Sequel's Postgres dataset doesn't know about.
         module ClickHouseDatasetMethods
+          JOIN_KEYWORDS = %w[
+            global inner left right full cross outer semi anti any all asof array paste
+          ].freeze
+
           # ClickHouse uses C-style escape sequences in string literals, so
           # backslashes must be doubled. Sequel's default (Postgres) escaping
           # only escapes single-quotes.
@@ -73,6 +77,16 @@ module UmbrellioUtils
           end
 
           private
+
+          def join_type_sql(join_type)
+            return super unless join_type.is_a?(Symbol)
+
+            words = join_type.to_s.split("_", -1)
+            return super if words.empty?
+            return super unless words.all? { |word| JOIN_KEYWORDS.include?(word) }
+
+            "#{words.join(" ").upcase} JOIN"
+          end
 
           # The subquery must project every column, both so the outer query can
           # filter on `is_deleted` and so a caller's projection still resolves;
